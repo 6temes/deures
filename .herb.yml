@@ -1,0 +1,17 @@
+# Herb's tools split in two, and both halves run in `bin/ci`.
+#
+# `herb analyze` is the gem: it parses and compiles every template and fails on a broken one,
+# in Ruby, pinned by the Gemfile.
+#
+# `herb lint` is the rules below, and it is a Node program. It is pinned by package.json and
+# yarn.lock, so the gem runs node_modules/.bin/herb-lint rather than resolving a version off
+# the network — which is what it does when no local copy exists.
+linter:
+  enabled: true
+
+# The formatter rewrites whole templates. It is on, so a view is formatted the same way
+# whoever saves it, and a diff shows the change rather than someone's editor settings.
+formatter:
+  enabled: true
+  indentWidth: 2
+  maxLineLength: 100

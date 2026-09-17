@@ -1,0 +1,40 @@
+# == Schema Information
+#
+# Table name: study_days
+#
+#  id                :integer          not null, primary key
+#  done_at           :datetime
+#  done_seen_at      :datetime
+#  due_count_at_open :integer
+#  excuse_reason     :string
+#  excused_at        :datetime
+#  first_opened_at   :datetime
+#  new_count_at_open :integer
+#  study_date        :date             not null
+#  created_at        :datetime         not null
+#  updated_at        :datetime         not null
+#  child_id          :integer          not null
+#
+# Indexes
+#
+#  index_study_days_on_child_id_and_study_date  (child_id,study_date) UNIQUE
+#
+# Foreign Keys
+#
+#  child_id  (child_id => children.id)
+#
+pau_today:
+  child: pau
+  study_date: 2026-09-14
+  first_opened_at: 2026-09-13 23:30:00
+  due_count_at_open: 2
+  new_count_at_open: 0
+
+teo_yesterday:
+  child: teo
+  study_date: 2026-09-13
+  first_opened_at: 2026-09-13 08:05:00
+  due_count_at_open: 1
+  new_count_at_open: 3
+  done_at: 2026-09-13 08:19:00
+  done_seen_at: 2026-09-13 08:19:00

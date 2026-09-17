@@ -1,0 +1,13 @@
+#!/usr/bin/env ruby
+
+# --groups answers what the groups in config/ci.rb are called, and the GitHub workflow asks
+# before it has installed anything. So booting waits until there is a run to do, and that
+# question is answerable with nothing but the Ruby on the machine.
+unless ARGV.include?("--groups")
+  require_relative "../config/boot"
+  require "active_support/continuous_integration"
+
+  CI = ActiveSupport::ContinuousIntegration
+end
+
+require_relative "../config/ci.rb"

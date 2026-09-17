@@ -1,0 +1,28 @@
+<%# locals: (item:) -%>
+<div class="question"><%= item.shown_prompt %></div>
+
+<%#
+  Both fields belong to the pad's form by name rather than by nesting: the form stays put
+  while these are replaced, so each question brings its own empty answer and its own token.
+%>
+
+<input
+  class="typed"
+  id="typed"
+  name="answer"
+  form="answer"
+  type="text"
+  value=""
+  readonly
+  inputmode="none"
+  autocomplete="off"
+  tabindex="-1"
+  data-pad-target="typed"
+>
+
+<input
+  type="hidden"
+  name="showing_token"
+  form="answer"
+  value="<%= item.showing_token %>"
+>

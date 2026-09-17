@@ -1,0 +1,20 @@
+# Standard is the whole of the Ruby style here: there is no configuration to argue about, and
+# the Rails cops arrive through the plugin rather than as a second list to keep in step.
+plugins:
+  - standard-rails
+
+ruby_version: 4.0
+
+ignore:
+  - "db/schema.rb"
+  - "node_modules/**/*"
+  - "vendor/**/*"
+  # The console is this app's whole administration surface: an operation prints its one-line
+  # summary to the terminal that ran it, and a logger would send it where nobody is looking.
+  - "app/operations/**/*":
+      - Rails/Output
+  # Not application code: a command-line script, which prints to the terminal that ran it and
+  # reports a bad argument by exiting.
+  - "config/ci.rb":
+      - Rails/Exit
+      - Rails/Output

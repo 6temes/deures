@@ -1,0 +1,23 @@
+<div
+  id="screen"
+  class="screen study"
+  data-screen="study"
+  style="--child-light: <%= @child.color_hex %>; --child-dark: <%= @child.color_hex_dark %>"
+  data-controller="pad resume"
+  data-resume-date-value="<%= @study_day.study_date.iso8601 %>"
+  data-resume-zone-value="<%= Time.zone.tzinfo.identifier %>"
+>
+  <span id="progress" class="progress"><%= render "studies/progress", day: @study_day %></span>
+
+  <%#
+    The pad below stays outside this element, which is replaced question by question: a pad
+    inside it would be torn down and rebuilt between one question and the next.
+  %>
+
+  <div id="card" class="card">
+    <%= render "studies/card", item: @item if @item %>
+    <%= render "studies/done", celebrate: @celebrate, child: @child if @study_day.done_at? %>
+  </div>
+
+  <%= render "studies/pad" if @item %>
+</div>

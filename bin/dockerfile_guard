@@ -1,0 +1,35 @@
+#!/usr/bin/env ruby
+
+# The Dockerfile's base-image version has to mirror .ruby-version, so the image runs the Ruby
+# that CI and development run. They are duplicated rather than derived because a Dockerfile
+# cannot read a file: an ARG default has to be a literal, and the ARG feeding the first FROM
+# has to be declared before it. This is what keeps the two copies honest — bump the version
+# file and the ARG in the same commit.
+#
+# .nvmrc is deliberately not in this list. Node is build-time tooling here, for the ERB linter
+# and the language servers; the image installs none of it, and an ARG NODE_VERSION would be a
+# version pinned for something the container never runs.
+
+PAIRS = { ".ruby-version" => "RUBY_VERSION" }.freeze
+
+dockerfile = File.read("Dockerfile")
+
+problems = PAIRS.filter_map do |file, arg|
+  expected = File.read(file).strip
+  declared = dockerfile[/^ARG #{arg}=(.+)$/, 1]&.strip
+
+  if declared.nil?
+    "Dockerfile declares no `ARG #{arg}=`, and #{file} pins #{expected}."
+  elsif declared != expected
+    "Dockerfile has `ARG #{arg}=#{declared}`, and #{file} pins #{expected}."
+  end
+end
+
+if problems.any?
+  problems.each { warn it }
+  warn ""
+  warn "Change the version file and the Dockerfile together."
+  exit 1
+end
+
+puts "Dockerfile: the base image matches #{PAIRS.keys.join(" and ")}."

@@ -1,0 +1,28 @@
+<% content_for :head do %>
+  <link rel="manifest" href="<%= pairing_manifest_path(@token) %>">
+  <link rel="apple-touch-icon" href="<%= pairing_icon_path(@token) %>">
+
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="<%= @child.name %>">
+
+  <script nonce="<%= content_security_policy_nonce %>">
+    // A manifest fetch that failed during Add to Home Screen installs this page as the start URL,
+    // which would leave the child looking at the install view every launch.
+    if (matchMedia("(display-mode: standalone)").matches || navigator.standalone) {
+      location.replace("/")
+    }
+  </script>
+<% end %>
+
+<div
+  id="screen"
+  class="screen install"
+  style="--child-light: <%= @child.color_hex %>; --child-dark: <%= @child.color_hex_dark %>"
+  data-screen="install"
+>
+  <%= image_tag pairing_icon_path(@token), class: "install-icon", width: 180, height: 180, alt: @child.name %>
+
+  <p class="install-name"><%= @child.name %></p>
+</div>

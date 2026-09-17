@@ -1,0 +1,4 @@
+#!/bin/sh
+# bin/setup points core.hooksPath here, so this hook travels with the repository instead of
+# living in one clone's .git directory. Silent unless it refuses something.
+exec bin/secrets_guard >/dev/null

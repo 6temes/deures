@@ -1,0 +1,10 @@
+#!/bin/bash
+# Bare runs writes; --ci only reports, which is what the gate wants. .prettierignore decides
+# what is in scope: the JavaScript, and not the ERB, the fixtures, the README or the stylesheet.
+set -euo pipefail
+
+if [ "${1:-}" = "--ci" ]; then
+  exec node_modules/.bin/prettier --ignore-unknown --check .
+else
+  exec node_modules/.bin/prettier --ignore-unknown --write .
+fi

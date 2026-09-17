@@ -1,0 +1,50 @@
+# == Schema Information
+#
+# Table name: queue_items
+#
+#  id                  :integer          not null, primary key
+#  cleared_at          :datetime
+#  cleared_reason      :string
+#  last_wrong_at       :datetime
+#  showing_token       :string
+#  shown_accepted_keys :json
+#  shown_at            :datetime
+#  shown_prompt        :text
+#  sort_key            :integer          not null
+#  source              :string           not null
+#  wrong_count         :integer          default(0), not null
+#  created_at          :datetime         not null
+#  updated_at          :datetime         not null
+#  card_id             :integer
+#  study_day_id        :integer          not null
+#
+# Indexes
+#
+#  index_queue_items_on_card_id                   (card_id)
+#  index_queue_items_on_showing_token             (showing_token) UNIQUE
+#  index_queue_items_on_study_day_id_and_card_id  (study_day_id,card_id) UNIQUE
+#
+# Foreign Keys
+#
+#  card_id       (card_id => cards.id) ON DELETE => nullify
+#  study_day_id  (study_day_id => study_days.id)
+#
+# Check Constraints
+#
+#  wrong_count_is_not_negative  (wrong_count >= 0)
+#
+pau_sum_23_19:
+  study_day: pau_today
+  card: sum_23_19
+  sort_key: 1
+  source: review
+  showing_token: showing-pau-23-19
+  shown_at: 2026-09-13 23:29:55
+  shown_prompt: "23 + 19"
+  shown_accepted_keys: [ "42" ]
+
+pau_sum_38_27:
+  study_day: pau_today
+  card: sum_38_27
+  sort_key: 2
+  source: review

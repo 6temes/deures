@@ -1,0 +1,17 @@
+#!/bin/bash -e
+
+# Migrate the database that is already there, and refuse to boot without one. db:prepare would
+# otherwise create and seed an empty database, which a replicator would then copy over the
+# children's history — the one failure a backup cannot undo. No ordering guarantee between a
+# restore and the server is worth trusting here, because a host that reboots brings this
+# container back on its own. The first deploy of all creates the database by hand, once.
+if [ "${@: -2:1}" == "./bin/rails" ] && [ "${@: -1:1}" == "server" ]; then
+  if [ ! -f /rails/storage/production.sqlite3 ]; then
+    echo "no database at /rails/storage/production.sqlite3, and no restore has put one there: refusing to boot" >&2
+    exit 1
+  fi
+
+  ./bin/rails db:prepare
+fi
+
+exec "${@}"

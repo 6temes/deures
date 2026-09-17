@@ -1,0 +1,445 @@
+/*
+ * One screen: a question, a typed answer, and a number pad. Nothing here scrolls, nothing is
+ * selectable, and no gesture the children make by accident can change the view — there is no
+ * browser chrome to undo one with, and nothing on screen to get back to.
+ */
+
+:root {
+  color-scheme: light dark;
+
+  /* The neutral base. #screen washes the first four with the child's color, but they are
+     defined here as well because `html, body` paints the ground and a custom property does not
+     inherit upwards: defined only on #screen, the page behind the safe-area insets would fall
+     back to the browser's own canvas. A screen with no child keeps these. */
+  --ground: light-dark(#efece7, #1d1b19);
+  --surface: light-dark(#fbfaf7, #2a2724);
+  --line: light-dark(#e4e0da, #3f3c37);
+  --shade: light-dark(#d6d1c9, #141311);
+
+  --ink: light-dark(#1c1b1a, #eceff4);
+  --muted: light-dark(#5f6570, #98a0ae);
+  --tick: light-dark(#3e5a26, #b3cf8a);
+  --tick-soft: light-dark(#e2ead9, #252d1e);
+  --wrong: light-dark(#7b8190, #8a91a0);
+  /* An uncleared star is an outline rather than a pale fill: filled against outlined is a
+     difference in kind, which survives a screen with fingerprints on it at arm's length. */
+  --star-empty: light-dark(#656b76, #8b93a2);
+  --child: light-dark(#2457c5, #7ea6ff); /* overridden per child at render time */
+
+  --pad-gap: clamp(6px, 1.2vmin, 12px);
+  --digits: "SF Pro Rounded", "Avenir Next", "Segoe UI", system-ui, sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+/* Whose iPad this is, before a digit is read. The ground is the child's own color washed over
+   the neutral base rather than a color of its own: one warm ground would flatter the orange and
+   red children and fight the blue and teal ones, and there are seven of them. */
+#screen {
+  --child: light-dark(var(--child-light), var(--child-dark));
+
+  --ground: light-dark(
+    color-mix(in oklab, var(--child-light) 9%, #efece7),
+    color-mix(in oklab, var(--child-dark) 10%, #1d1b19));
+  --surface: light-dark(
+    color-mix(in oklab, var(--child-light) 4%, #fbfaf7),
+    color-mix(in oklab, var(--child-dark) 7%, #2a2724));
+  --line: light-dark(
+    color-mix(in oklab, var(--child-light) 14%, #e4e0da),
+    color-mix(in oklab, var(--child-dark) 12%, #3f3c37));
+  --shade: light-dark(
+    color-mix(in oklab, var(--child-light) 20%, #d6d1c9),
+    color-mix(in oklab, var(--child-dark) 8%, #141311));
+
+  background: var(--ground);
+}
+
+/* The lost-identity screen has no child, so the washes above would resolve to nothing. It
+   carries the id as well as the class, so the neutral ground has to match that specificity to
+   reach it — a bare `.lost` loses to `#screen` whatever the source order. */
+#screen.lost {
+  --ground: light-dark(#e4e1db, #201e1c);
+  --muted: light-dark(#6f6a62, #a39c92);
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+  overscroll-behavior: none;
+  background: var(--ground);
+  color: var(--ink);
+  font-family: var(--digits);
+  /* A stray pinch cannot zoom a standalone app that has no chrome to reset it. */
+  touch-action: none;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-text-size-adjust: 100%;
+}
+
+/* The dynamic viewport inside the safe area, measured once here: an iPad in landscape loses
+   roughly a third of its height, and nothing in the app scrolls to recover a key pushed out
+   of the bottom of it. */
+body {
+  height: 100dvh;
+  padding:
+    env(safe-area-inset-top) env(safe-area-inset-right)
+    env(safe-area-inset-bottom) env(safe-area-inset-left);
+}
+
+/* A blue bar that appears only on a slow answer is a sentence the screen does not need. */
+.turbo-progress-bar { display: none; }
+
+.screen {
+  height: 100%;
+  display: grid;
+  /* The column has to be told it cannot exceed the screen. Left implicit it is `auto`, which
+     sizes to its widest content — so a long star row widens the column past the viewport
+     instead of being asked to fit inside it, and the end of the row is simply gone. */
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  gap: var(--pad-gap);
+  padding: var(--pad-gap);
+}
+
+/* The only thing above the question. The child's name sat here and said nothing they did not
+   already know: they are alone on their own iPad, launched from their own icon, and the screen
+   is painted in their color for the whole session. */
+.progress {
+  justify-self: end;
+  /* Bounded by the column, or `justify-self: end` sizes the row to its contents and it simply
+     grows past the edge — a flex container with no upper bound never asks its items to shrink,
+     so the marks stay at their preferred size and the last of them are clipped away. */
+  max-width: 100%;
+  display: flex;
+  /* The row never wraps and never pushes the card down: a long day shrinks the stars instead. */
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: clamp(5px, 0.9vmin, 7px);
+  padding: 6px 4px;
+}
+
+.pip {
+  width: clamp(16px, 3.9vmin, 30px);
+  height: clamp(16px, 3.9vmin, 30px);
+  /* Shrinkable on purpose. The cap on new cards keeps an ordinary day near a dozen, but nothing
+     caps the cards that come due, so a child back from a week away meets all of them at once.
+     The clamp is the size the row prefers; past about twenty-two marks in portrait it has to
+     give that up rather than run off an edge nothing scrolls back from. */
+  flex: 0 1 auto;
+  min-width: 0;
+
+  /* Not cleared yet: an outline. Honest about being empty, and countable. */
+  fill: none;
+  stroke: var(--star-empty);
+  stroke-width: 2.2;
+  stroke-linejoin: round;
+  /* The star shrinks on a twenty-five card day; the outline must not shrink with it, or it
+     draws at under two pixels and stops being a shape. */
+  vector-effect: non-scaling-stroke;
+}
+
+.pip-lit {
+  fill: var(--child);
+  stroke: none;
+}
+
+/* The mark a clearing answer just put there. The partial only emits this class on a render that
+   cleared something, because the row is replaced wholesale on every answer: a class recomputed
+   from the index alone would ride a brand-new element and play again on a wrong answer, which is
+   the one moment the screen is telling the child they got it wrong. */
+.pip-new { animation: land 520ms cubic-bezier(0.2, 1.4, 0.4, 1); }
+
+@keyframes land {
+  0% { transform: scale(0) rotate(-60deg); }
+  60% { transform: scale(1.25) rotate(6deg); }
+  100% { transform: scale(1) rotate(0); }
+}
+
+/* The box is a row of the screen's grid rather than a height its contents set, so swapping the
+   question inside it cannot move the pad below it. */
+.card {
+  position: relative;
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+  place-items: center;
+  overflow: hidden;
+  background: var(--surface);
+  border: 2px solid var(--line);
+  border-radius: 32px;
+  padding: var(--pad-gap);
+}
+
+.question {
+  font-size: clamp(38px, 13.5vmin, 104px);
+  font-weight: 800;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.typed {
+  width: 100%;
+  min-height: 1.2em;
+  border: 0;
+  background: transparent;
+  color: var(--child);
+  font: inherit;
+  font-size: clamp(34px, 11vmin, 84px);
+  font-weight: 900;
+  line-height: 1.15;
+  text-align: center;
+  caret-color: transparent;
+  /* Nothing reaches the field itself: it is a display the pad writes, and a tap that focused
+     it would be the one thing that opens the iPad keyboard. */
+  pointer-events: none;
+}
+
+.keys {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--pad-gap);
+  width: min(100%, 35rem);
+  /* justify-self rather than margin-inline: the pad is a grid item of .screen, and centring it
+     as one is the declaration that survives every renderer. */
+  justify-self: center;
+}
+
+.key {
+  display: grid;
+  place-items: center;
+  /* 44px is Apple's minimum touch target, and this is the app's only input, pressed by a
+     six-year-old. The floor clears it with room. */
+  height: clamp(56px, 12dvh, 92px);
+  background: var(--surface);
+  color: var(--ink);
+  border: 2px solid var(--line);
+  border-radius: 26px;
+  font: inherit;
+  font-size: clamp(26px, 5.6vmin, 46px);
+  font-weight: 800;
+  touch-action: manipulation;
+  /* The ledge the press travels into. */
+  box-shadow: 0 3px 0 var(--shade);
+
+  /* The press the iPad cannot give back: no vibration motor, so the key moves instead. Losing
+     the ledge is what reads as travel, and there is no transition because the press has to
+     land at the moment the finger does. */
+  &:active {
+    transform: scale(0.94);
+    box-shadow: none;
+  }
+
+  /* The one key that is not a number, findable without being read. */
+  &.key-backspace {
+    background: color-mix(in oklab, var(--line) 60%, var(--surface));
+    color: var(--muted);
+  }
+
+  & svg {
+    width: 1.3em;
+    height: 1.3em;
+  }
+
+  /* The submit key is a fill rather than ink, so it keeps the saturated color in both
+     appearances and takes a light ink that passes on all seven. */
+  &.key-enter {
+    background: var(--child-light);
+    border-color: transparent;
+    color: #fff8ec;
+    box-shadow: 0 3px 0 color-mix(in srgb, var(--child-light) 45%, #000);
+
+    /* The submit key darkens its own color rather than falling back to the grey every other
+       key presses to, which is what it did while this rule carried no background of its own. */
+    &:active {
+      filter: brightness(0.85);
+      box-shadow: none;
+    }
+  }
+}
+
+/* The verdict sits over the next card, which the same response has already rendered under it. */
+.verdict {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: var(--pad-gap);
+  border-radius: 32px;
+  background: var(--tick-soft);
+}
+
+/* Held at min(22vmin, 116px): the card is only about 248px tall in landscape once the taller
+   keys take their share, and a larger tick clips against the echoed answer below it. */
+.tick {
+  width: min(22vmin, 116px);
+  height: min(22vmin, 116px);
+  color: var(--tick);
+  animation: pop 700ms cubic-bezier(0.2, 1.4, 0.4, 1);
+}
+
+.echo {
+  font-size: clamp(28px, 9vmin, 104px);
+  font-weight: 900;
+  line-height: 1;
+  color: var(--tick);
+}
+
+/* The wrong answer beside the right one, over the next question the same response has already
+   rendered under it: nothing red, nothing to tap, and no timer. The copy is what lifts it. */
+.correction {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-auto-flow: column;
+  place-content: center;
+  align-items: center;
+  gap: calc(var(--pad-gap) * 3);
+  border-radius: 32px;
+  background: var(--surface);
+  font-size: clamp(24px, 7vmin, 88px);
+  font-weight: 800;
+  line-height: 1;
+}
+
+.struck {
+  color: var(--wrong);
+  text-decoration: line-through;
+  text-decoration-thickness: 0.09em;
+}
+
+/* The digits stay inline rather than becoming flex or grid items, which would put a line
+   break between them in the text the copy is read back from. */
+.expected {
+  color: var(--muted);
+  letter-spacing: 0.04em;
+
+  /* The only mark the copy makes: the digits already copied take the child's own color. */
+  & [data-copied] { color: var(--child); }
+}
+
+/* The done screen is the base content of the card box rather than an overlay over it, which is
+   what keeps the verdict and the correction painting above it until they go. */
+.done {
+  display: grid;
+  place-items: center;
+}
+
+.done-name {
+  font-size: clamp(48px, 20vmin, 150px);
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  color: var(--child);
+  animation: rise 600ms ease-out 320ms backwards;
+}
+
+/* The celebration is the row the child filled, not a second set of stars beside it. `:has()` on
+   the shared screen is what reaches it: the done element is inside #card, the row is a
+   preceding sibling of #card, and no selector runs from one to the other directly. */
+/* Not while an overlay is up. The done screen is rendered under the verdict or the correction,
+   the way the next card is, and the row it grows into sits outside the card those overlays
+   cover — so keying on the done screen alone would centre and enlarge the row while the child
+   is still copying digits. Both overlays remove themselves, which is what flips this. */
+#screen:has([data-screen="done"]):not(:has(.verdict, .correction)) {
+  grid-template-rows: auto minmax(0, 1fr);
+
+  & .progress {
+    justify-self: center;
+    gap: 12px;
+    padding: 14px 4px 4px;
+  }
+
+  & .pip {
+    width: clamp(24px, 5.5vmin, 44px);
+    height: clamp(24px, 5.5vmin, 44px);
+  }
+}
+
+/* The ripple waits for the class the done controller adds once nothing covers the card. The row
+   sits outside the card, so the verdict and the correction never hide it — gated on the done
+   state alone it would play while the child is still copying digits. Gating it here also means
+   reopening a finished day renders the grown row without replaying it, because the controller
+   is attached only on the render that claims the celebration. */
+#screen:has(.done.celebrating) .pip {
+  animation: land 520ms cubic-bezier(0.2, 1.4, 0.4, 1) calc(var(--i) * 45ms) backwards;
+}
+
+@keyframes pop {
+  from { transform: scale(0) rotate(-45deg); }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(0.35em);
+  }
+}
+
+/* There is nothing to tap: the overlay takes every pointer event, and it is translucent so the
+   digits the retry is still carrying stay on screen underneath it. */
+.no-connection {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  background: color-mix(in srgb, var(--ground) 84%, transparent);
+  color: var(--muted);
+
+  &[hidden] { display: none; }
+
+  & svg {
+    width: min(30vmin, 140px);
+    height: min(30vmin, 140px);
+    animation: breathe 1.8s ease-in-out infinite;
+  }
+}
+
+@keyframes breathe {
+  50% { opacity: 0.3; }
+}
+
+/* The install page and the lost-identity screen carry one mark each and no question, so they
+   center rather than using the question / answer / pad rows above. */
+.install, .lost {
+  grid-template-rows: none;
+  place-content: center;
+  justify-items: center;
+  gap: calc(var(--pad-gap) * 3);
+}
+
+.install-icon {
+  width: min(45vmin, 180px);
+  height: min(45vmin, 180px);
+  border-radius: 22.5%;
+  box-shadow: 0 8px 28px rgb(0 0 0 / 0.18);
+}
+
+.install-name {
+  margin: 0;
+  font-size: clamp(22px, 5vmin, 44px);
+  font-weight: 800;
+  color: var(--child);
+}
+
+.grown-up {
+  width: min(40vmin, 160px);
+  height: min(40vmin, 160px);
+  color: var(--muted);
+}
+
+/* Every animation this app plays, switched off together. This block is last in the file on
+   purpose: each rule below repeats a selector declared earlier, and a media query adds no
+   specificity — so source order is the only thing that lets it win. Moving it up silently
+   disables the guard rather than breaking anything. */
+@media (prefers-reduced-motion: reduce) {
+  .key:active { transform: none; }
+
+  .tick,
+  .done-name,
+  .pip-new,
+  #screen:has(.done.celebrating) .pip { animation: none; }
+}

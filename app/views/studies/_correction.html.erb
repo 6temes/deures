@@ -1,0 +1,11 @@
+<%# locals: (attempt:) -%>
+<%#
+  The child's answer and the right one, side by side: nothing red, nothing that marks the
+  mistake with a sound of its own, and no timer. The pad marks each digit as it is copied, and the last one removes this element,
+  revealing the next question the same response has already rendered underneath.
+%>
+
+<div class="correction" data-pad-target="correction">
+  <span class="struck"><%= attempt.answer %></span>
+  <span class="expected"><%= safe_join attempt.accepted_keys.first.chars.map { tag.span it, data: { pad_target: "expected" } } %></span>
+</div>

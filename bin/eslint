@@ -1,0 +1,9 @@
+#!/bin/bash
+# Bare runs fix; --ci only reports, which is what the gate wants.
+set -euo pipefail
+
+if [ "${1:-}" = "--ci" ]; then
+  exec node_modules/.bin/eslint app/javascript
+else
+  exec node_modules/.bin/eslint --fix app/javascript
+fi

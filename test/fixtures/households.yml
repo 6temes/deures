@@ -1,0 +1,11 @@
+# == Schema Information
+#
+# Table name: households
+#
+#  id         :integer          not null, primary key
+#  time_zone  :string           default("Asia/Tokyo"), not null
+#  created_at :datetime         not null
+#  updated_at :datetime         not null
+#
+tokyo:
+  time_zone: Asia/Tokyo

@@ -1,0 +1,17 @@
+<%= turbo_stream.update "card" do %>
+  <%= render "studies/verdict", attempt: @attempt if @attempt&.correct? %>
+  <%= render "studies/correction", attempt: @attempt if @attempt&.wrong? %>
+  <%= render "studies/card", item: @item if @item %>
+  <%= render "studies/done", celebrate: @celebrate, child: @child if @study_day.done_at? %>
+<% end %>
+
+<%= turbo_stream.update "progress" do %>
+  <%= render "studies/progress", day: @study_day, landed: @attempt&.correct? %>
+<% end %>
+
+<%# The pad is the form with this id, and it sits outside #card so that it survives the
+    question-by-question replacement above — which also means nothing above takes it off the
+    screen. The last card cleared has to remove it here, or the done screen arrives with a
+    dead pad under it, which is not what that same day renders when it is reloaded. A
+    correction keeps the pad whether or not a card is left: copying the answer is typed on it. %>
+<%= turbo_stream.remove "answer" unless @item || @attempt&.wrong? %>

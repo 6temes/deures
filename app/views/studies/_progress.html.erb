@@ -1,0 +1,22 @@
+<%# locals: (day:, landed: false) -%>
+<%#
+  How much of today is left, for a child who cannot yet read `3 / 12`: one star per card,
+  filled for the ones they have cleared and outlined for the ones they have not. `--i` is the
+  index the done screen staggers its ripple by.
+
+  `landed` marks the newest star so it animates in, and it has to come from the caller rather
+  than from the index: this row is replaced wholesale on every answer, so a class derived from
+  `cleared` alone would ride a brand-new element and play again on a wrong answer and on every
+  reopen of the day.
+%>
+
+<% cleared = day.cleared_count %>
+<% total = cleared + day.remaining_count %>
+<% total.times do |i| %>
+  <svg
+    class="pip<%= " pip-lit" if i < cleared %><%= " pip-new" if landed && i == cleared - 1 %>"
+    style="--i: <%= i %>"
+    viewBox="0 0 24 24"
+    aria-hidden="true"
+  ><path d="M10.67,5.56 A1.64,1.64 0 0 1 13.33,5.56 L14.74,7.52 A2.27,2.27 0 0 0 15.89,8.36 L18.19,9.09 A1.64,1.64 0 0 1 19.01,11.62 L17.58,13.56 A2.27,2.27 0 0 0 17.14,14.92 L17.16,17.33 A1.64,1.64 0 0 1 15.00,18.90 L12.71,18.14 A2.27,2.27 0 0 0 11.29,18.14 L9.00,18.90 A1.64,1.64 0 0 1 6.84,17.33 L6.86,14.92 A2.27,2.27 0 0 0 6.42,13.56 L4.99,11.62 A1.64,1.64 0 0 1 5.81,9.09 L8.11,8.36 A2.27,2.27 0 0 0 9.26,7.52 L10.67,5.56 Z" /></svg>
+<% end %>

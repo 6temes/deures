@@ -1,0 +1,12 @@
+<%# locals: (celebrate:, child:) -%>
+<%#
+  The end of the day, in the box the questions were in: the child's name, and no sentence. The
+  stars are the progress row above, which is full by definition at this point and grows into
+  the celebration rather than being joined by a second row of its own. It is rendered under the
+  verdict or the correction exactly as the next card is, so whatever lifts one of those is what
+  reveals it.
+%>
+
+<%= tag.div class: "done", data: { screen: "done", controller: ("done" if celebrate) } do %>
+  <div class="done-name"><%= child.name %></div>
+<% end %>

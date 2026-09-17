@@ -1,0 +1,66 @@
+# == Schema Information
+#
+# Table name: card_progresses
+#
+#  id               :integer          not null, primary key
+#  due_on           :date
+#  last_answered_on :date
+#  parked_on        :date
+#  rung             :integer          default(0), not null
+#  created_at       :datetime         not null
+#  updated_at       :datetime         not null
+#  card_id          :integer          not null
+#  child_id         :integer          not null
+#
+# Indexes
+#
+#  index_card_progresses_on_card_id               (card_id)
+#  index_card_progresses_on_child_id_and_card_id  (child_id,card_id) UNIQUE
+#  index_card_progresses_on_child_id_and_due_on   (child_id,due_on) WHERE due_on IS NOT NULL
+#
+# Foreign Keys
+#
+#  card_id   (card_id => cards.id)
+#  child_id  (child_id => children.id)
+#
+# Check Constraints
+#
+#  rung_is_on_the_ladder  (rung >= 0 AND rung <= 6)
+#
+pau_sum_23_19:
+  child: pau
+  card: sum_23_19
+  rung: 4
+  due_on: 2026-09-14
+  last_answered_on: 2026-08-29
+
+pau_sum_38_27:
+  child: pau
+  card: sum_38_27
+  rung: 0
+  due_on: 2026-09-14
+  parked_on: 2026-09-13
+  last_answered_on: 2026-09-13
+
+pau_difference_7_7:
+  child: pau
+  card: difference_7_7
+
+pau_times_6_7:
+  child: pau
+  card: times_6_7
+
+teo_sum_23_19:
+  child: teo
+  card: sum_23_19
+  rung: 1
+  due_on: 2026-09-15
+  last_answered_on: 2026-09-14
+
+teo_sum_38_27:
+  child: teo
+  card: sum_38_27
+
+teo_difference_7_7:
+  child: teo
+  card: difference_7_7

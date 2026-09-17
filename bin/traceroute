@@ -1,0 +1,17 @@
+#!/bin/bash
+# traceroute reports and always exits 0, so it cannot gate anything on its own. Everything it
+# finds today belongs to Rails itself: /up is the health endpoint a deploy's healthcheck calls
+# even though nothing in the app links it, and rails/mailers is the dev-only preview browser.
+# Anything else is this app's — a route nothing reaches, or an action nothing routes to.
+set -euo pipefail
+
+found=$(bundle exec rake traceroute | grep -E '^  ' | grep -vE '^  rails/' || true)
+
+if [ -z "$found" ]; then
+  echo "Traceroute: every route is reachable and every action is routed."
+  exit 0
+fi
+
+echo "Traceroute found routes or actions nothing uses:" >&2
+echo "$found" >&2
+exit 1

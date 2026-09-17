@@ -1,0 +1,48 @@
+# == Schema Information
+#
+# Table name: attempts
+#
+#  id                :integer          not null, primary key
+#  accepted_keys     :json             not null
+#  answer            :text             not null
+#  answer_key        :string           not null
+#  attempt_index     :integer          not null
+#  prompt            :text             not null
+#  seconds_to_answer :float            not null
+#  showing_token     :string           not null
+#  study_date        :date             not null
+#  verdict           :string           not null
+#  created_at        :datetime         not null
+#  updated_at        :datetime         not null
+#  card_id           :integer
+#  child_id          :integer          not null
+#
+# Indexes
+#
+#  index_attempts_on_card_id                  (card_id)
+#  index_attempts_on_child_id_and_study_date  (child_id,study_date)
+#  index_attempts_on_lapses                   (child_id,card_id,study_date) WHERE attempt_index = 1 AND verdict = 'wrong'
+#  index_attempts_on_showing_token            (showing_token) UNIQUE
+#
+# Foreign Keys
+#
+#  card_id   (card_id => cards.id)
+#  child_id  (child_id => children.id)
+#
+# Check Constraints
+#
+#  attempt_index_is_positive          (attempt_index >= 1)
+#  seconds_to_answer_is_not_negative  (seconds_to_answer >= 0)
+#
+pau_sum_38_27_wrong:
+  child: pau
+  card: sum_38_27
+  study_date: 2026-09-13
+  prompt: "38 + 27"
+  accepted_keys: [ "65" ]
+  answer: "56"
+  answer_key: "56"
+  verdict: wrong
+  seconds_to_answer: 4.2
+  attempt_index: 1
+  showing_token: showing-pau-38-27-yesterday

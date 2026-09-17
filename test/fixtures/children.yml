@@ -1,0 +1,35 @@
+# == Schema Information
+#
+# Table name: children
+#
+#  id                  :integer          not null, primary key
+#  color               :string           not null
+#  created_on          :date             not null
+#  light_day_threshold :integer          default(10), not null
+#  name                :string           not null
+#  new_card_cap        :integer          default(5), not null
+#  created_at          :datetime         not null
+#  updated_at          :datetime         not null
+#
+# Indexes
+#
+#  index_children_on_name  (name) UNIQUE
+#
+# Check Constraints
+#
+#  light_day_threshold_leaves_room  (light_day_threshold >= 1)
+#  new_card_cap_is_not_negative     (new_card_cap >= 0)
+#
+pau:
+  name: Pau
+  color: blue
+  light_day_threshold: 10
+  new_card_cap: 5
+  created_on: 2026-09-01
+
+teo:
+  name: Teo
+  color: green
+  light_day_threshold: 10
+  new_card_cap: 3
+  created_on: 2026-09-01

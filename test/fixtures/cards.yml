@@ -1,0 +1,62 @@
+# Fixtures bypass the callbacks that derive these three columns, so each one is
+# written out and the digest computed the way Card computes it.
+# == Schema Information
+#
+# Table name: cards
+#
+#  id               :integer          not null, primary key
+#  accepted_answers :json             not null
+#  accepted_keys    :json             not null
+#  content_digest   :string           not null
+#  position         :integer          not null
+#  prompt           :text             not null
+#  prompt_key       :string           not null
+#  retired_at       :datetime
+#  created_at       :datetime         not null
+#  updated_at       :datetime         not null
+#  deck_id          :integer          not null
+#
+# Indexes
+#
+#  index_cards_on_deck_id_and_position    (deck_id,position)
+#  index_cards_on_deck_id_and_prompt_key  (deck_id,prompt_key) UNIQUE WHERE retired_at IS NULL
+#
+# Foreign Keys
+#
+#  deck_id  (deck_id => decks.id)
+#
+sum_23_19:
+  deck: addition
+  position: 1
+  prompt: "23 + 19"
+  prompt_key: "23+19"
+  accepted_answers: [ "42" ]
+  accepted_keys: [ "42" ]
+  content_digest: <%= Normalize.digest("23+19", [ "42" ]) %>
+
+sum_38_27:
+  deck: addition
+  position: 2
+  prompt: "38 + 27"
+  prompt_key: "38+27"
+  accepted_answers: [ "65" ]
+  accepted_keys: [ "65" ]
+  content_digest: <%= Normalize.digest("38+27", [ "65" ]) %>
+
+difference_7_7:
+  deck: addition
+  position: 3
+  prompt: "7 - 7"
+  prompt_key: "7-7"
+  accepted_answers: [ "0" ]
+  accepted_keys: [ "0" ]
+  content_digest: <%= Normalize.digest("7-7", [ "0" ]) %>
+
+times_6_7:
+  deck: tables
+  position: 1
+  prompt: "6 × 7"
+  prompt_key: "6×7"
+  accepted_answers: [ "42" ]
+  accepted_keys: [ "42" ]
+  content_digest: <%= Normalize.digest("6×7", [ "42" ]) %>

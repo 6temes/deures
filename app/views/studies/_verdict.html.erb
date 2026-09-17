@@ -1,0 +1,17 @@
+<%# locals: (attempt:) -%>
+<div class="verdict" data-pad-target="verdict" data-controller="advance">
+  <svg
+    class="tick"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="3"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    aria-hidden="true"
+  >
+    <path d="m4 13 5.5 5.5L20 6" />
+  </svg>
+
+  <div class="echo"><%= attempt.answer_key %></div>
+</div>

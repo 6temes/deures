@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <title><%= content_for(:title) || "Deures" %></title>
+
+    <%#
+      The scale clamp backs up touch-action: none, and viewport-fit lets the shell paint under
+      the home indicator while its padding keeps the screen clear of it.
+    %>
+
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"
+    >
+
+    <meta name="application-name" content="Deures">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+
+    <%#
+      The manifest link, the apple-touch-icon and the standalone meta tags belong to the install
+      view alone: only that request holds the plaintext token they have to carry, and an icon
+      added from a page without one launches with no cookie and no way to get one.
+    %>
+    <%= yield :head %>
+
+    <%# The pad's click, fetched before the first key is pressed rather than on it. %>
+    <link rel="preload" href="<%= asset_path "key.wav" %>" as="audio" type="audio/wav">
+
+    <%#
+      The rasters first and the SVG last: an SVG favicon carries its own prefers-color-scheme
+      swap, so a browser that can adapt should prefer it, and one that cannot never reaches it.
+    %>
+    <link rel="icon" href="/icon.png" type="image/png" sizes="512x512">
+    <link rel="icon" href="/favicon-32.png" type="image/png" sizes="32x32">
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+
+    <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
+    <%= javascript_importmap_tags %>
+  </head>
+
+  <%#
+    The overlay is rendered on every page and toggled with `hidden`, because the request that
+    would fetch it on demand is the one that has just failed. It sits outside the yielded
+    screen so that nothing a response swaps can take it, or the retry driving it, away.
+  %>
+
+  <body
+    data-controller="connection"
+    data-action="turbo:submit-start->connection#waiting
+                     turbo:before-fetch-response->connection#inspect
+                     turbo:submit-end->connection#settled"
+  >
+    <%= yield %>
+    <%= render "shared/no_connection" %>
+  </body>
+</html>

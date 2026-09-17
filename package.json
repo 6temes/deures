@@ -1,0 +1,16 @@
+{
+  "private": true,
+  "packageManager": "yarn@1.22.22",
+  "engines": {
+    "node": ">=24"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.0",
+    "@herb-tools/language-server": "^0.10.4",
+    "@herb-tools/linter": "^0.10.4",
+    "eslint": "^9.39.0",
+    "globals": "^16.0.0",
+    "prettier": "^3.7.0",
+    "stimulus-language-server": "^1.1.2"
+  }
+}
