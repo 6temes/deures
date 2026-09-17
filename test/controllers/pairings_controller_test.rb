@@ -197,7 +197,7 @@ class PairingsControllerTest < ActionDispatch::IntegrationTest
     get "/p/#{@token}"
 
     assert_equal unknown_status, response.status
-    assert_equal unknown_body, response.body
+    assert_equal without_nonce(unknown_body), without_nonce(response.body)
   end
 
   test "the lost-identity screen, which is the shared layout without the install view, links no manifest and no per-child icon" do
@@ -242,5 +242,14 @@ class PairingsControllerTest < ActionDispatch::IntegrationTest
 
     assert_select "meta[name=viewport][content=?]",
       "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"
+  end
+
+  private
+
+  # The CSP nonce is fresh per request by design, so it is the one part of these two bodies
+  # that must differ. Everything else still has to match byte for byte.
+  def without_nonce(body)
+    body.gsub(/nonce="[^"]*"/, 'nonce=""')
+      .gsub(/(<meta name="csp-nonce" content=)"[^"]*"/, '\\1""')
   end
 end

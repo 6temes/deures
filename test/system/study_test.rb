@@ -325,6 +325,14 @@ class StudyTest < ApplicationSystemTestCase
     page.current_window.resize_to(*desktop)
   end
 
+  test "the child's own colour reaches the screen" do
+    # The colour arrives as a `style` attribute, which no nonce can cover — only the
+    # `style-src-attr` directive does. Lose that line and the attribute is dropped silently:
+    # every screen falls back to the neutral `:root` ground and nothing else breaks.
+    assert_equal children(:pau).color_hex, custom_property("#screen", "--child-light")
+    assert_equal children(:pau).color_hex_dark, custom_property("#screen", "--child-dark")
+  end
+
   test "a long backlog keeps its star row on the screen" do
     desktop = page.current_window.size
 
@@ -497,6 +505,10 @@ class StudyTest < ApplicationSystemTestCase
   def open_study_screen(child)
     visit "/p/#{child.pairing_links.create!.plain_token}"
     visit "/"
+  end
+
+  def custom_property(selector, name)
+    page.evaluate_script("getComputedStyle(document.querySelector('#{selector}')).getPropertyValue('#{name}').trim()")
   end
 
   def tap_key(key)
