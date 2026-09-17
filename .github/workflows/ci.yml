@@ -5,6 +5,11 @@ on:
   push:
     branches: [ main ]
 
+# The gate only reads the tree. A public repository hands this token to every fork's pull
+# request, so it gets the narrowest scope that still lets the checkout happen.
+permissions:
+  contents: read
+
 jobs:
   # The groups are not listed here. config/ci.rb is the gate AGENTS.md names, and a second list
   # of steps in this file drifts from it silently: the seeds and the operations listing were
