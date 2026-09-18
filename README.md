@@ -135,7 +135,7 @@ Node program, so `bin/ci` needs it.
 ```bash
 bin/setup                      # dependencies and the database
 bin/dev                        # development server
-bin/ci                         # the gate: style, security, tests, seeds. Run before merging
+bin/ci                         # the gate. Run before merging
 bin/ci style                   # one group of it — style, security, tests, or system
 bin/rails runner 'Ops.help'    # every operation, with a working example of each
 ```
@@ -155,7 +155,8 @@ and the entrypoint that boots it; what any deployment has to provide is:
 | A persistent volume at `/rails/storage` | `production.sqlite3` lives there and is the whole of the app's state. |
 | A database file in that volume before the server starts | The entrypoint refuses to boot without one rather than creating an empty one — see the [runbook](RUNBOOK.md#the-first-boot). |
 | Continuous replication of that file off the host | The volume is one disk, and every card, schedule and attempt is on it. |
-| TLS, the original `Host` header, and the forwarded-proto header | The app builds the pairing URL from the host it is reached on. |
+| `APP_HOST`, the domain the app is reached on | It is the `config.hosts` allowlist, so without it production rejects every request; and it is the host `Ops::Devices::IssueLink` prints pairing links for. Both fall back to `study.example.com`. |
+| TLS terminated in front of the app, with the `Host` header preserved | `force_ssl` and `assume_ssl` are both on, so the app trusts that it is behind HTTPS and does not need the forwarded-proto header — but the `Host` it receives has to match `APP_HOST`. |
 
 The first boot, the first seed, pairing an iPad and the restore drill are in
 [RUNBOOK.md](RUNBOOK.md).

@@ -1,9 +1,9 @@
 # Runbook
 
 The one-time and occasional operations for running Deures for a household: bringing the database
-into being, seeding it, pairing an iPad, and proving the backup is a backup.
+into being, pairing an iPad, and proving the backup is a backup.
 
-[README.md](README.md#deployment) says what a deployment has to provide, and
+[README.md](README.md#running-it-for-real) says what a deployment has to provide, and
 [AGENTS.md](AGENTS.md) is the rule book for the operations themselves.
 
 ## The first boot
@@ -16,7 +16,9 @@ So the first deploy of all creates the database once, by hand, before the server
 bin/rails db:prepare
 ```
 
-Every deploy after that finds the file the volume or a restore left, and migrates it.
+That creates it, migrates it, and — because it created it — loads `db/seeds.rb` as well, so the
+household exists from this one command. Every deploy after that finds the file the volume or a
+restore left and only migrates it.
 
 ## The console
 
@@ -31,26 +33,24 @@ most on the device you are least likely to be at a desk with.
 In the console, `ops` lists every operation. Outside it, `bin/rails runner 'Ops.help'` prints the
 same listing.
 
-## The first seed
+## What the seeds put there
 
-`db/seeds.rb` is the household's launch state: the household in Asia/Tokyo, Pau (blue, threshold
-10, cap 5), Teo (green, threshold 10, cap 3), and Pau's first deck. It authors that deck through
-`Ops::Decks::Create`, `Ops::Decks::Assign` and `Ops::Cards::Add` and no other path, which is why
-the deck is a seed file rather than a transcript to paste: `bin/ci` runs the seeds on every build,
-so content the operations would refuse fails there rather than at the console on the day the iPads
-are handed over. Run it once, after the first deploy:
-
-```bash
-bin/rails db:seed
-```
+The first boot above already loaded them. `db/seeds.rb` is the household's launch state: the
+household in Asia/Tokyo, Pau (blue, threshold 10, cap 5), Teo (green, threshold 10, cap 3), and
+Pau's first deck. It authors that deck through `Ops::Decks::Create`, `Ops::Decks::Assign` and
+`Ops::Cards::Add` and no other path, which is why the deck is a seed file rather than a transcript
+to paste: `bin/ci` runs the seeds on every build, so content the operations would refuse fails
+there rather than at the console on the day the iPads are handed over. Every step skips what is
+already there, so `bin/rails db:seed` is safe to run again and changes nothing.
 
 "Addition to 100" is 40 cards in teaching order — whole tens, then a one-digit addend, then two
 two-digit numbers, then the same with carrying, and last the pairs that make 100 — of which the
 first twelve are due on the day the seed runs, so Pau's first session is a session rather than the
-five new cards his daily cap would otherwise allow. The rest arrive five a day, on any day that
-starts with fewer than ten cards already due. Every step skips what is already there, so running
-the seeds again changes nothing. Teo has no deck yet; his is authored from the console with those
-same three operations.
+five new cards his daily cap would otherwise allow. The rest arrive at up to five a day: his cap
+is 5 against a light-day threshold of 10, so a day opening with five or fewer cards due admits
+five, a day opening with nine admits one, and a day already at ten admits none.
+
+Teo has no deck yet; his is authored from the console with those same three operations.
 
 Then read back what landed:
 
