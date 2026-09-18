@@ -30,8 +30,9 @@ What the gate cannot see, and you have to:
 - **No local paths.** Never write a home directory or a checkout path into a file here — not in
   a comment, a plan, a commit message, or a README. Name the thing, not where it sits on one
   machine.
-- **No real household values.** The backup host, its user, the app's domain, and the SSH paths
-  appear in the README as placeholders. Keep them placeholders.
+- **No real household values.** The app's domain, the backup host and its login, and any path on
+  the server are configuration, not documentation. Where one has to be shown, it is a placeholder
+  — `APP_HOST` is named, never its value.
 - **A pairing link is a credential.** `Ops::Devices::IssueLink` prints one that signs an iPad in
   as a child with no further check. It belongs in the terminal that printed it, never in a
   commit, an issue, a test fixture, or a screenshot.
@@ -45,7 +46,7 @@ bin/rails test                 # unit and integration tests
 bin/rails test:system          # browser tests
 bin/standardrb --fix           # Ruby style, with autocorrect
 bin/annotaterb models          # rewrite the schema comment on each model, test, and fixture
-bin/ci                         # the gate: style, security, tests, seeds. Run before merging
+bin/ci                         # the gate. Run before merging
 bin/ci style                   # one group of it — style, security, tests, or system
 bin/secrets_guard              # refuse a commit that carries a key, a database, or a log
 bin/rails runner 'Ops.help'    # every operation, with a working example of each
