@@ -1,192 +1,173 @@
-<img src=".github/mark.svg" alt="" width="88">
+<div align="center">
+
+<img src=".github/mark.svg" alt="" width="96">
 
 # Deures
 
+**A wordless maths drill two children open on their own iPads.**
+
+<a href="LICENSE"><img alt="MIT" src="https://img.shields.io/badge/license-MIT-green"></a>
+<a href=".github/workflows/ci.yml"><img alt="CI" src="https://github.com/6temes/deures/actions/workflows/ci.yml/badge.svg"></a>
+<a href=".ruby-version"><img alt="Ruby" src="https://img.shields.io/badge/ruby-4.0-CC342D"></a>
+<img alt="Rails" src="https://img.shields.io/badge/rails-8.1-D30001">
+<img alt="SQLite" src="https://img.shields.io/badge/sqlite-one%20file-003B57">
+
+<a href="#what-it-is">What it is</a>
+◆ <a href="#a-session">A session</a>
+◆ <a href="#how-the-cards-are-chosen">How the cards are chosen</a>
+◆ <a href="#one-colour-per-child">Colours</a>
+◆ <a href="#try-it">Try it</a>
+◆ <a href="#development">Development</a>
+
+</div>
+
+## What it is
+
 *Deures* is Catalan for homework.
 
-Pau and Teo each open this on their own iPad and answer the maths cards due that day on an
-in-app number pad, until they reach the done screen. It is installed from Safari to the Home
-Screen, comes up already signed in as that child on every launch, and has no parent screen, no
-admin screen, and no menu anywhere.
+Pau and Teo each open this on their own iPad, answer the maths cards that are due that day on an
+in-app number pad, and reach a screen with their name on it. Then they are finished, and there is
+nothing else in the app to do.
+
+That last part is the design. It is installed from Safari to the Home Screen, comes up already
+signed in as that child on every launch, and has **no parent screen, no settings, no menu and no
+links** — because a screen a child can reach is a screen a child will reach. A child this age
+cannot read `3 / 12` either, so no text in the app carries meaning: the day's progress is one star
+per card, and the only thing to tap is a digit.
+
+Everything a parent does — writing a deck, watching where a child is stuck, pairing an iPad —
+happens in a Rails console, never in the app.
+
+## A session
+
+There are four screens, and a child moves between them by answering.
+
+| | What the child sees |
+|---|---|
+| **The card** | One question, the number pad, and a row of stars — filled for the cards cleared so far, outlined for the ones still to come. |
+| **Right** | The answer turns their colour and a star fills. The next card arrives. |
+| **Wrong** | What they typed, struck through, and the right answer beside it — nothing red, no sound of its own, no timer. They copy it on the pad, digit by digit, and the last one reveals the next question. The card goes to the back of the day's queue, so it comes round again before the day is over. |
+| **Done** | Their name, alone, and the star row grows and centres. Reopening the app the same day returns here. |
+
+A card that is answered wrong three times in one day is **parked**: it stops coming round, the
+day can still finish, and it is flagged for the parent to look at. Nothing tells the child off.
+
+## How the cards are chosen
+
+A **deck** is an ordered list of cards — "Addition to 100" is 40 of them, in teaching order:
+whole tens, then a one-digit addend, then two two-digit numbers, then the same with carrying, and
+last the pairs that make 100. A deck is assigned to a child, and from then on each child has
+their own progress on each card.
+
+### The ladder
+
+Progress is a rung on a six-rung ladder. Answer a card right and it climbs one rung; the rung
+decides how far out it comes back.
+
+```text
+rung   0        1       2       3       4        5        6
+       │        │       │       │       │        │        │
+due    new    +1 day  +2 days +4 days +8 days +16 days +32 days
+       or a
+       lapse
+```
+
+One wrong answer costs the whole ladder: the card drops to rung 0 and is due again tomorrow, so
+the next correct answer earns one day again, exactly as on a card never seen before. Only a
+card's **first** answer of the day moves it, so answering wrong and then right on the same day
+does not both reset the card and promote it.
+
+### The day
+
+The day is assembled once, the first time the child opens the app that day:
+
+1. **Everything due.** Every card whose due date has arrived or passed.
+2. **New cards, but only onto a light day.** Enough to reach the child's new-card cap, or enough
+   to fill the day to their light-day threshold, whichever is smaller. A day that is already
+   heavy with reviews admits none.
+
+Pau's cap is 5 a day against a threshold of 10; Teo's is 3. So a child back from a week away
+meets their whole backlog at once and no new cards on top of it, and a child who is up to date
+gets a short day of five new ones. Cards answered wrong go to the back of the queue rather than
+being re-sorted, so the order the day was assembled in survives them. The day is over when the
+queue is empty.
+
+Because the schedule is per child and per card, two children can share a deck and be in
+completely different places in it.
+
+## One colour per child
 
 <img src=".github/palette.svg" alt="The seven child colours" width="386">
 
-Each child owns one of those colours. It paints their typed digits, their submit key, their
-stars and their pairing card, and their Home Screen icon is that colour and nothing else — which
-is how two iPads on the same table are told apart.
+Each child owns one of those seven. It paints their typed digits, their submit key, their stars,
+and a wash of it tints the whole screen behind them. Their Home Screen icon is that colour and
+nothing else — which is how two iPads on the same table are told apart, by a child who cannot
+read the label under either.
 
-The administration surface is the console: every read and write of the app's data is an
-operation in `app/operations/ops/`. [AGENTS.md](AGENTS.md) is the rule book for that, and it is
-the first thing to read before changing anything here.
+## Try it
+
+```bash
+git clone https://github.com/6temes/deures.git
+cd deures
+bin/setup                                       # dependencies, database, and the seeds
+bin/dev                                         # http://localhost:3000
+```
+
+There is no login form, so a fresh checkout has nothing to look at until a device is paired. Mint
+a link for one of the seeded children and open it:
+
+```bash
+bin/rails runner 'puts "/p/" + Child.find_by!(name: "Pau").pairing_links.create!.plain_token'
+```
+
+Visit that path, then visit `/`. You are now that child, with twelve cards due and nothing to tap
+but a digit. Answer them all to reach the done screen.
+
+> **Prerequisites** Ruby as `.ruby-version` names it, Node as `.nvmrc` does, and a browser.
+> Nothing else — no Redis, no Postgres, no build step, no API key.
 
 ## Development
 
-Ruby, as `.ruby-version` names it, and Node, as `.nvmrc` does. Node is not part of the app —
-there is no build step and no JavaScript dependency at runtime — but the ERB linter is a Node
-program, so `bin/ci` needs it.
+One Rails app and one SQLite file. Plain CSS in a single stylesheet, Turbo and Stimulus over
+importmap, and **no build step** — Node is not part of the app at all, but the ERB linter is a
+Node program, so `bin/ci` needs it.
 
 ```bash
 bin/setup                      # dependencies and the database
 bin/dev                        # development server
 bin/ci                         # the gate: style, security, tests, seeds. Run before merging
 bin/ci style                   # one group of it — style, security, tests, or system
-bin/secrets_guard              # refuse a commit that carries a key, a database, or a log
 bin/rails runner 'Ops.help'    # every operation, with a working example of each
 ```
 
-## Deployment
+Every read and write of the app's data goes through an operation in `app/operations/ops/`, and
+nothing reaches a model directly. [AGENTS.md](AGENTS.md) is the rule book for that, and it is the
+first thing to read before changing anything here.
 
-Deployment is not configured here. The infra repository owns it — the Kamal configuration, the
-proxy, the backups, and the host — and this repository holds only the `Dockerfile` that builds
-the image and the entrypoint that boots it.
+## Running it for real
 
-What the app needs from any deployment:
+Deployment is not configured here. This repository holds the `Dockerfile` that builds the image
+and the entrypoint that boots it; what any deployment has to provide is:
 
 | What | Why |
 |---|---|
 | `RAILS_MASTER_KEY` | Decrypts the credentials. The app will not boot in production without it. |
 | A persistent volume at `/rails/storage` | `production.sqlite3` lives there and is the whole of the app's state. |
-| A database file in that volume before the server starts | The entrypoint refuses to boot without one rather than creating an empty one — see below. |
+| A database file in that volume before the server starts | The entrypoint refuses to boot without one rather than creating an empty one — see the [runbook](RUNBOOK.md#the-first-boot). |
 | Continuous replication of that file off the host | The volume is one disk, and every card, schedule and attempt is on it. |
 | TLS, the original `Host` header, and the forwarded-proto header | The app builds the pairing URL from the host it is reached on. |
 
-### The first boot
+The first boot, the first seed, pairing an iPad and the restore drill are in
+[RUNBOOK.md](RUNBOOK.md).
 
-The server refuses to boot when there is no database file, rather than creating an empty one: a
-seeded database replicated over the children's history is the one failure a backup cannot undo.
-So the first deploy of all creates the database once, by hand, before the server first starts:
+## Contributing
 
-```bash
-bin/rails db:prepare
-```
+This is one household's app, so it carries one household's assumptions — but it is MIT and it is
+meant to be run and changed. To use it for your own children, fork it: `db/seeds.rb` is the launch
+state to edit, and `Ops::Decks::Create` authors a deck of your own.
 
-Every deploy after that finds the file the volume or a restore left, and migrates it.
-
-### The console
-
-Give the server a host alias in `~/.ssh/config` on the machine the agent runs from, so nothing
-has to remember an address:
-
-```sshconfig
-Host study
-  HostName <address>
-  User <user>
-```
-
-Then:
-
-```bash
-ssh study
-tmux new -A -s deures
-```
-
-and open a Rails console in the running container. Every command from here on runs in there, and
-is written below as the `bin/rails` command itself; the invocation that reaches the container
-belongs to the deployment, so the infra repository is where it is written down.
-
-Run it inside tmux. A console on a phone loses its connection sooner or later, and an operation
-that was half-way through a transaction when that happens is worth being able to walk back into;
-`tmux new -A -s deures` re-attaches to the same session rather than opening a second one. In
-the console, `ops` lists every operation. Outside it,
-`bin/rails runner 'Ops.help'` prints the same listing.
-
-### The first seed
-
-`db/seeds.rb` is the household's launch state: the household in Asia/Tokyo, Pau (blue, threshold
-10, cap 5), Teo (green, threshold 10, cap 3), and Pau's first deck. It authors that deck through
-`Ops::Decks::Create`, `Ops::Decks::Assign` and `Ops::Cards::Add` and no other path, which is why
-the deck is a seed file rather than a transcript to paste: `bin/ci` runs the seeds on every build,
-so content the operations would refuse fails there rather than at the console on the day the iPads
-are handed over. Run it once, after the first deploy:
-
-```bash
-bin/rails db:seed
-```
-
-"Addition to 100" is 40 cards in teaching order — whole tens, then a one-digit addend, then two
-two-digit numbers, then the same with carrying, and last the pairs that make 100 — of which the
-first twelve are due on the day the seed runs, so Pau's first session is a session rather than the
-five new cards his daily cap would otherwise allow. The rest arrive five a day, on any day that
-starts with fewer than ten cards already due. Every step skips what is already there, so running
-the seeds again changes nothing. Teo has no deck yet; his is authored from the console with those
-same three operations.
-
-Never run `db:seed:replant` on the server. It purges every table before it seeds, the attempt log
-included. It is the form CI runs, against a database that is thrown away afterwards.
-
-Then read back what landed:
-
-```ruby
-Ops::Reads::Status.call
-Ops::Reads::Forecast.call child: "Pau"
-```
-
-### Pairing an iPad
-
-Issue the link from the console, which prints it as a code the iPad camera reads:
-
-```ruby
-Ops::Devices::IssueLink.call child: "Pau"
-```
-
-Point the camera at the code, open it in Safari, then Share and Add to Home Screen. The icon
-comes up in the child's color. Force-quit the app and reopen it from the icon to confirm it
-comes back as that child with nothing to tap. A link never expires and can be opened on as many
-devices as needed.
-
-Two operations sign an iPad out, and they are not interchangeable:
-
-```ruby
-Ops::Devices::Forget.call child: "Pau", confirm: true      # signs the iPads out, keeps the icon working
-Ops::Devices::RevokeLink.call child: "Pau", confirm: true  # kills the link, and the icon with it
-```
-
-Forgetting leaves the pairing link live, so the icon already on the Home Screen pairs that iPad
-again at the next launch: Pau taps it and his question is there, with nothing to install and
-nothing to tap. That is the re-pair drill — run it on a handover day to prove an iPad that has
-been shut in a drawer for weeks still heals itself. It forgets every device that child has
-signed in, not a chosen one, and the rows stay with their last-seen stamps, so it is still
-possible to tell which iPad was which.
-
-Revoking takes the link with it, which is the one to reach for when a device has to stay out:
-every iPad that used that link shows the lost-identity screen until a new link is issued and
-added to the Home Screen again.
-
-### The restore drill
-
-Whatever replicates the database, the drill is the same, and it is the only proof that a backup
-is a backup. Run it before either child is handed the app, and again after any change to the
-services, the volume, or the replication settings: destroy the volume, bring the app back, and
-run
-
-```ruby
-Ops::Reads::Status.call
-```
-
-It has to print the children and where they are today. If the server will not start, or the
-listing comes back empty, the restore did not put the database back — and the replicator must
-not be allowed to run against a database the restore did not write, because it will copy that
-one over the real history.
-
-## What each loss costs
-
-### The master key
-
-`config/master.key` decrypts the credentials, and the app cannot boot in production without it:
-the container will restart and the proxy will have nothing to reach. It does not sign the iPads
-out. The pairing cookie is an opaque token checked against the `devices` table, neither signed
-nor encrypted, so it survives a new `secret_key_base` — which is exactly why it is written that
-way. Recovery is to put the key back, or, if it is gone for good, to write new credentials and
-redeploy. The children notice nothing.
-
-### The database
-
-Losing the volume is what replication is for, and the drill above is the rehearsal.
-Losing the volume *and* the replica is different: the device rows are the identity of record, so
-both iPads are signed out, and every card, schedule, and attempt is gone with them. Recovery is
-to issue a new pairing link for each child and add the app to the Home Screen again on each
-iPad. Reopening the icon that is already there cannot re-pair it: the installed start URL
-carries the old token, and that token no longer exists.
+Issues and pull requests are welcome. `bin/ci` is the gate and it has to be green;
+[AGENTS.md](AGENTS.md) says what the house rules are before you change anything.
 
 ## License
 
