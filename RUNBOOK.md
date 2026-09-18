@@ -20,31 +20,16 @@ Every deploy after that finds the file the volume or a restore left, and migrate
 
 ## The console
 
-Give the server a host alias in `~/.ssh/config` on the machine the agent runs from, so nothing
-has to remember an address:
+Every operation below runs in a Rails console on the host, and is written as the `bin/rails`
+command itself. How you reach that console — and the invocation that gets into the running
+container — belongs to the deployment, so the infra repository is where that is written down.
 
-```sshconfig
-Host study
-  HostName <address>
-  User <user>
-```
+Use whatever keeps the session alive across a dropped connection. An operation that was half-way
+through a transaction when the link died is worth being able to walk back into, and that matters
+most on the device you are least likely to be at a desk with.
 
-Then:
-
-```bash
-ssh study
-tmux new -A -s deures
-```
-
-and open a Rails console in the running container. Every command from here on runs in there, and
-is written below as the `bin/rails` command itself; the invocation that reaches the container
-belongs to the deployment, so the infra repository is where it is written down.
-
-Run it inside tmux. A console on a phone loses its connection sooner or later, and an operation
-that was half-way through a transaction when that happens is worth being able to walk back into;
-`tmux new -A -s deures` re-attaches to the same session rather than opening a second one. In
-the console, `ops` lists every operation. Outside it,
-`bin/rails runner 'Ops.help'` prints the same listing.
+In the console, `ops` lists every operation. Outside it, `bin/rails runner 'Ops.help'` prints the
+same listing.
 
 ## The first seed
 
