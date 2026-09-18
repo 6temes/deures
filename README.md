@@ -86,11 +86,13 @@ The day is assembled once, the first time the child opens the app that day:
    to fill the day to their light-day threshold, whichever is smaller. A day that is already
    heavy with reviews admits none.
 
-Pau's cap is 5 a day against a threshold of 10; Teo's is 3. So a child back from a week away
-meets their whole backlog at once and no new cards on top of it, and a child who is up to date
-gets a short day of five new ones. Cards answered wrong go to the back of the queue rather than
-being re-sorted, so the order the day was assembled in survives them. The day is over when the
-queue is empty.
+Both the cap and the threshold are set per child, so how fast a child moves is a setting rather
+than something the app decides. Whatever they are, the shape holds: a child back from a week away
+meets their whole backlog and no new cards on top of it, and a child who is up to date gets a
+short day of new ones.
+
+The day is over when the queue is empty. Cards answered wrong go to the back of it, so they come
+round again within the same day.
 
 Because the schedule is per child and per card, two children can share a deck and be in
 completely different places in it.
@@ -133,7 +135,7 @@ importmap, and **no build step** — Node is not part of the app at all, but the
 Node program, so `bin/ci` needs it.
 
 ```bash
-bin/setup                      # dependencies and the database
+bin/setup                      # dependencies, database, and the seeds
 bin/dev                        # development server
 bin/ci                         # the gate. Run before merging
 bin/ci style                   # one group of it — style, security, tests, or system
