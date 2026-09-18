@@ -52,9 +52,6 @@ starts with fewer than ten cards already due. Every step skips what is already t
 the seeds again changes nothing. Teo has no deck yet; his is authored from the console with those
 same three operations.
 
-Never run `db:seed:replant` on the server. It purges every table before it seeds, the attempt log
-included. It is the form CI runs, against a database that is thrown away afterwards.
-
 Then read back what landed:
 
 ```ruby
