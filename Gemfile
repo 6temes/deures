@@ -59,6 +59,7 @@ gem "opentelemetry-instrumentation-action_view"
 gem "opentelemetry-instrumentation-active_job"
 gem "opentelemetry-instrumentation-active_support"
 gem "opentelemetry-instrumentation-net_http"
+gem "opentelemetry-instrumentation-rack"
 gem "opentelemetry-sdk"
 
 group :development, :test do

@@ -489,6 +489,7 @@ DEPENDENCIES
   opentelemetry-instrumentation-active_job
   opentelemetry-instrumentation-active_support
   opentelemetry-instrumentation-net_http
+  opentelemetry-instrumentation-rack
   opentelemetry-sdk
   prometheus_exporter
   propshaft

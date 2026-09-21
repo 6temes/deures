@@ -38,8 +38,12 @@ end
 
 ActiveSupport.on_load(:action_dispatch_request) { prepend PairingTokenRedaction::FilteredPath }
 
-# The SDK is configured by the opentelemetry initializer, which loads first. Without an OTLP
-# endpoint it is never configured and the no-op provider takes no processors.
-if OpenTelemetry.tracer_provider.is_a? OpenTelemetry::SDK::Trace::TracerProvider
-  OpenTelemetry.tracer_provider.add_span_processor PairingTokenRedaction::SpanProcessor.new
+# Registered after every initializer rather than at load: the SDK is configured by another
+# initializer, and leaning on the two filenames sorting in the right order would let a rename
+# switch the redaction off while tracing carried on. Without an OTLP endpoint the SDK is never
+# configured and the no-op provider takes no processors.
+Rails.application.config.after_initialize do
+  if OpenTelemetry.tracer_provider.is_a? OpenTelemetry::SDK::Trace::TracerProvider
+    OpenTelemetry.tracer_provider.add_span_processor PairingTokenRedaction::SpanProcessor.new
+  end
 end

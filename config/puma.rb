@@ -43,7 +43,7 @@ pidfile ENV["PIDFILE"] if ENV["PIDFILE"]
 
 # Puma thread saturation, process memory, and the Active Record pool. Reported by the same
 # client the app uses, so there is one collector to point Prometheus at.
-unless ENV["RAILS_ENV"] == "test"
+if ENV["PROMETHEUS_COLLECTOR_HOST"]
   require "prometheus_exporter/instrumentation"
 
   after_booted do
