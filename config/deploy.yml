@@ -1,0 +1,110 @@
+# Name of your application. Used to uniquely configure containers.
+service: deures
+
+# Name of the container image. Bare, because registry.server below supplies the prefix.
+image: dlopez/deures
+
+# The host, its SSH port, the application's domain and the backup target are configuration and
+# this repository is published, so every one of them arrives from the deploying environment.
+servers:
+  web:
+    hosts:
+      - <%= ENV["DEPLOY_HOST"] %>
+    options:
+      # Reap orphaned child processes rather than letting zombies accumulate under the Rails
+      # process as PID 1.
+      init: true
+      # Contain an OOM kill to this container rather than to the host it shares.
+      memory: 1g
+
+ssh:
+  user: deploy
+  port: <%= ENV["DEPLOY_SSH_PORT"] %>
+
+# All traffic arrives over a Cloudflare tunnel, which reaches kamal-proxy on localhost by HTTP.
+proxy:
+  host: <%= ENV["APP_HOST"] %>
+  app_port: 80
+  healthcheck:
+    path: /up
+
+# Kamal's own transient registry, forwarded over SSH from the machine that builds the image.
+registry:
+  server: localhost:5555
+
+# Inject ENV variables into containers (secrets come from .kamal/secrets).
+env:
+  secret:
+    - RAILS_MASTER_KEY
+  clear:
+    APP_HOST: <%= ENV["APP_HOST"] %>
+    # The entrypoint restores the primary database from the replica on a fresh volume, so the
+    # web container needs the same SFTP target as the litestream accessory; without host and
+    # user the restore aborts with "host required for sftp replica". The key and known_hosts it
+    # reads are mounted in the volumes block below.
+    LITESTREAM_REPLICA_ROOT: <%= ENV["LITESTREAM_REPLICA_ROOT"] %>
+    LITESTREAM_SFTP_HOST: <%= ENV["LITESTREAM_SFTP_HOST"] %>
+    LITESTREAM_SFTP_USER: <%= ENV["LITESTREAM_SFTP_USER"] %>
+    OTEL_EXPORTER_OTLP_ENDPOINT: http://<%= ENV["WG_MAINFRAME_IP"] %>:4318
+    OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
+    OTEL_TRACES_SAMPLER: always_on
+    PROMETHEUS_COLLECTOR_HOST: deures-prometheus-exporter
+    SOLID_QUEUE_IN_PUMA: true
+
+accessories:
+  prometheus-exporter:
+    image: localhost:5555/dlopez/deures:latest
+    host: <%= ENV["DEPLOY_HOST"] %>
+    # The container side stays 9394 to match the prometheus_exporter client initializer and the
+    # command below; the host side is this application's own, the neighbours holding 9394-9396.
+    port: "<%= ENV["METRICS_BIND_IP"] %>:9397:9394"
+    cmd: bundle exec prometheus_exporter --prefix ruby_ --histogram --bind 0.0.0.0 --port 9394
+
+  litestream:
+    # Pinned by digest and run as a numeric root: the image is FROM scratch with no passwd, so
+    # "root" by name will not resolve, and the image's own nonroot default cannot read either the
+    # 0600 SFTP key or root's known_hosts, which breaks replication without saying so.
+    image: litestream/litestream@sha256:5572700ba18710cb010a0e415e36abf5cc0b4d74a2ad7b6d6a387142c0c99604
+    options:
+      user: "0:0"
+    host: <%= ENV["DEPLOY_HOST"] %>
+    port: "<%= ENV["METRICS_BIND_IP"] %>:9093:9093"
+    env:
+      clear:
+        LITESTREAM_REPLICA_ROOT: <%= ENV["LITESTREAM_REPLICA_ROOT"] %>
+        LITESTREAM_SFTP_HOST: <%= ENV["LITESTREAM_SFTP_HOST"] %>
+        LITESTREAM_SFTP_USER: <%= ENV["LITESTREAM_SFTP_USER"] %>
+    volumes:
+      - "deures_storage:/rails/storage"
+      - "/home/deploy/.ssh/litestream_ed25519:/etc/litestream/sftp_key:ro"
+      # This container runs as root, so its known_hosts is root's.
+      - "/home/deploy/.ssh/litestream_known_hosts:/root/.ssh/known_hosts:ro"
+    files:
+      - config/litestream.yml:/etc/litestream.yml
+    cmd: replicate -config /etc/litestream.yml
+
+# Aliases are triggered with "bin/kamal <alias>".
+aliases:
+  console: app exec --interactive --reuse "bin/rails console"
+  dbc: app exec --interactive --reuse "bin/rails dbconsole --include-password"
+  logs: app logs -f
+  shell: app exec --interactive --reuse "bash"
+
+# Use a persistent storage volume for sqlite database files and local Active Storage files.
+volumes:
+  - "deures_storage:/rails/storage"
+  - "/home/deploy/.ssh/litestream_ed25519:/etc/litestream/sftp_key:ro"
+  # The web container runs as rails, not as root, so it reads known_hosts from that user's home.
+  - "/home/deploy/.ssh/litestream_known_hosts:/home/rails/.ssh/known_hosts:ro"
+
+# Bridge fingerprinted assets between versions to avoid 404 on in-flight requests.
+asset_path: /rails/public/assets
+
+# Configure the image builder.
+builder:
+  arch: amd64
+  cache:
+    type: gha
+    options: mode=max
+  args:
+    GIT_SHA: <%= `git rev-parse HEAD`.strip %>
