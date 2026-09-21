@@ -40,3 +40,15 @@ plugin :solid_queue if ENV["SOLID_QUEUE_IN_PUMA"]
 # Specify the PID file. Defaults to tmp/pids/server.pid in development.
 # In other environments, only set the PID file if requested.
 pidfile ENV["PIDFILE"] if ENV["PIDFILE"]
+
+# Puma thread saturation, process memory, and the Active Record pool. Reported by the same
+# client the app uses, so there is one collector to point Prometheus at.
+unless ENV["RAILS_ENV"] == "test"
+  require "prometheus_exporter/instrumentation"
+
+  after_booted do
+    PrometheusExporter::Instrumentation::Puma.start
+    PrometheusExporter::Instrumentation::Process.start type: "web"
+    PrometheusExporter::Instrumentation::ActiveRecord.start config_labels: [:database]
+  end
+end

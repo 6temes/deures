@@ -40,6 +40,24 @@ gem "bootsnap", require: false
 # Add HTTP asset caching/compression and X-Sendfile acceleration to Puma [https://github.com/basecamp/thruster/]
 gem "thruster", require: false
 
+# Prometheus metrics, reported to a collector running as a separate Kamal accessory
+gem "prometheus_exporter"
+
+# Structured JSON logging to stdout, so a log line arrives at the collector as fields
+# rather than as a line to be re-parsed [https://github.com/reidmorrison/rails_semantic_logger]
+gem "rails_semantic_logger"
+
+# OpenTelemetry tracing. The instrumentations are listed one by one rather than through a
+# meta-gem so that nothing this app does not run gets loaded; action_mailer is absent because
+# action_mailer/railtie is commented out in config/application.rb.
+gem "opentelemetry-exporter-otlp"
+gem "opentelemetry-instrumentation-action_pack"
+gem "opentelemetry-instrumentation-action_view"
+gem "opentelemetry-instrumentation-active_job"
+gem "opentelemetry-instrumentation-active_support"
+gem "opentelemetry-instrumentation-net_http"
+gem "opentelemetry-sdk"
+
 group :development, :test do
   # Static analysis for security vulnerabilities [https://brakemanscanner.org/]
   gem "brakeman", require: false
@@ -73,5 +91,10 @@ end
 group :test do
   # Use system testing [https://guides.rubyonrails.org/testing.html#system-testing]
   gem "capybara"
+
+  # Minitest 6 moved its own Mock and Object#stub out into this gem. It is not a second
+  # mocking library: it is where `stub` lives now.
+  gem "minitest-mock"
+
   gem "selenium-webdriver"
 end

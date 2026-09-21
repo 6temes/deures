@@ -33,9 +33,19 @@ Rails.application.configure do
   # Skip http-to-https redirect for the default health check endpoint.
   config.ssl_options = {redirect: {exclude: ->(request) { request.path == "/up" }}}
 
-  # Log to stdout with the current request id as a default log tag.
-  config.log_tags = [:request_id]
-  config.logger = ActiveSupport::TaggedLogging.logger($stdout)
+  # Log to stdout as JSON, so a line arrives at the collector as fields rather than as a
+  # sentence something downstream has to parse back apart.
+  config.rails_semantic_logger.appenders do |appenders|
+    appenders.add io: $stdout, formatter: :json
+  end
+
+  # The hash form names each tag, so the trace ids arrive as their own fields and a log line
+  # can be opened as the trace it belongs to.
+  config.log_tags = {
+    request_id: :request_id,
+    span_id: ->(_request) { OpenTelemetry::Trace.current_span.context.hex_span_id if OpenTelemetry::Trace.current_span.context.valid? },
+    trace_id: ->(_request) { OpenTelemetry::Trace.current_span.context.hex_trace_id if OpenTelemetry::Trace.current_span.context.valid? }
+  }
 
   # Change to "debug" to log everything (including potentially personally-identifiable information!).
   config.log_level = ENV.fetch("RAILS_LOG_LEVEL", "info")
