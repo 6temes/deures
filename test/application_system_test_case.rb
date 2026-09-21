@@ -3,6 +3,11 @@ require "test_helper"
 class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
   driven_by :selenium, using: :headless_chrome, screen_size: [1400, 900] do |driver_option|
     driver_option.add_argument("--disable-back-forward-cache")
+    # The number pad clicks on every key press, and the suite presses a lot of keys. This mutes
+    # Chrome's output only: the controller still builds its Audio, still calls play(), and the
+    # rejection it swallows still happens, which is why "pressing a key plays the click" can
+    # still fail when the tick breaks.
+    driver_option.add_argument("--mute-audio")
     driver_option.add_argument("--disable-dev-shm-usage") if ENV["CI"]
   end
 

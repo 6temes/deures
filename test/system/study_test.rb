@@ -51,6 +51,17 @@ class StudyTest < ApplicationSystemTestCase
     assert_equal ["42"], submissions(1).pluck("answer")
   end
 
+  test "pressing a key plays the click" do
+    # The only feedback an iPad can give for a key press besides how it looks: there is no
+    # vibration motor. Nothing else asserts it, and the suite runs muted, so without this the
+    # tick could stop working and every test would still pass.
+    count_plays
+
+    tap_key "4"
+
+    assert_equal 1, plays
+  end
+
   test "the pad accepts at most six digits" do
     (1..7).each { tap_key it.to_s }
 
@@ -509,6 +520,22 @@ class StudyTest < ApplicationSystemTestCase
 
   def custom_property(selector, name)
     page.evaluate_script("getComputedStyle(document.querySelector('#{selector}')).getPropertyValue('#{name}').trim()")
+  end
+
+  # Patched on the prototype rather than on `window.Audio`: the controller built its instance in
+  # connect(), long before this runs, and replacing the constructor now would leave that instance
+  # untouched. It calls through, so the real play() — and the rejection the controller swallows —
+  # still happens.
+  def count_plays
+    page.execute_script(<<~JS)
+      window.plays = 0
+      const play = Audio.prototype.play
+      Audio.prototype.play = function () { window.plays++; return play.call(this) }
+    JS
+  end
+
+  def plays
+    page.evaluate_script("window.plays")
   end
 
   def tap_key(key)
