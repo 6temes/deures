@@ -1,0 +1,29 @@
+# Prometheus metrics endpoint, scraped over the private network.
+addr: ":9093"
+
+# The backup host, its login and the directory it writes to are configuration, not documentation,
+# and this repository is published — so they arrive from the container's environment and the only
+# paths written here are the container's own.
+host: ${LITESTREAM_SFTP_HOST}
+user: ${LITESTREAM_SFTP_USER}
+key-path: /etc/litestream/sftp_key
+sync-interval: 10s
+
+# Retention is a top-level block from 0.5 onward. The per-replica keys it replaces are not
+# rejected there, they are ignored, so a replica carrying them keeps a retention nobody chose.
+snapshot:
+  interval: 24h
+  retention: 24h
+
+# The queue is replicated but never restored on boot: bringing it back would fire every job that
+# came due while the volume was gone. The entrypoint restores the primary alone.
+dbs:
+  - path: /rails/storage/production.sqlite3
+    replicas:
+      - type: sftp
+        path: ${LITESTREAM_REPLICA_ROOT}/production.sqlite3
+
+  - path: /rails/storage/production_queue.sqlite3
+    replicas:
+      - type: sftp
+        path: ${LITESTREAM_REPLICA_ROOT}/production_queue.sqlite3

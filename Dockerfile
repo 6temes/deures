@@ -20,6 +20,11 @@ RUN apt-get update -qq && \
     ln -s /usr/lib/$(uname -m)-linux-gnu/libjemalloc.so.2 /usr/local/lib/libjemalloc.so && \
     rm -rf /var/lib/apt/lists /var/cache/apt/archives
 
+# The entrypoint restores the database from its replica before the server starts. The binary is
+# taken from the same digest the replication accessory runs, so restore and replicate can never
+# be two different versions of Litestream.
+COPY --from=litestream/litestream@sha256:5572700ba18710cb010a0e415e36abf5cc0b4d74a2ad7b6d6a387142c0c99604 /usr/local/bin/litestream /usr/local/bin/litestream
+
 # Set production environment variables and enable jemalloc for reduced memory usage and latency.
 ENV RAILS_ENV="production" \
     BUNDLE_DEPLOYMENT="1" \
@@ -60,6 +65,10 @@ RUN SECRET_KEY_BASE_DUMMY=1 ./bin/rails assets:precompile
 # Final stage for app image
 FROM base
 
+# The running commit, which the deploy log and the traces are stamped with.
+ARG GIT_SHA
+ENV GIT_SHA=${GIT_SHA}
+
 # Run and own only the runtime files as a non-root user for security
 RUN groupadd --system --gid 1000 rails && \
     useradd rails --uid 1000 --gid 1000 --create-home --shell /bin/bash
@@ -68,6 +77,9 @@ USER 1000:1000
 # Copy built artifacts: gems, application
 COPY --chown=rails:rails --from=build "${BUNDLE_PATH}" "${BUNDLE_PATH}"
 COPY --chown=rails:rails --from=build /rails /rails
+
+# Litestream config for the entrypoint's restore.
+COPY --chown=rails:rails config/litestream.yml /etc/litestream.yml
 
 # Entrypoint prepares the database.
 ENTRYPOINT ["/rails/bin/docker-entrypoint"]
