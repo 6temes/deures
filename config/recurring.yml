@@ -1,0 +1,7 @@
+production:
+  # Solid Queue never prunes finished solid_queue_jobs rows itself, so without this they grow
+  # without bound. 03:00 is the quietest hour: the children are asleep and SQLite's write lock
+  # is uncontended.
+  clear_solid_queue_finished_jobs:
+    command: "SolidQueue::Job.clear_finished_in_batches(sleep_between_batches: 0.3)"
+    schedule: at 3am every day

@@ -5,13 +5,13 @@ require "rails"
 require "active_model/railtie"
 require "active_job/railtie"
 require "active_record/railtie"
-# require "active_storage/engine"
+require "active_storage/engine"
 require "action_controller/railtie"
 # require "action_mailer/railtie"
 # require "action_mailbox/engine"
 # require "action_text/engine"
 require "action_view/railtie"
-# require "action_cable/engine"
+require "action_cable/engine"
 require "rails/test_unit/railtie"
 
 # Require the gems listed in Gemfile, including any gems
@@ -27,6 +27,11 @@ module Deures
     # not contain `.rb` files, or that should not be reloaded or eager loaded.
     # Common ones are `templates`, `generators`, or `middleware`, for example.
     config.autoload_lib(ignore: %w[assets tasks])
+
+    # Nothing here is an image: Active Storage is present for the fleet's deploy shape, not for
+    # uploads. Leaving the processor on warns at every boot that image_processing is missing,
+    # and installing it would put a whole image toolchain in the runtime image for no caller.
+    config.active_storage.variant_processor = :disabled
 
     # Configuration for the application, engines, and railties goes here.
     #

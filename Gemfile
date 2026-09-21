@@ -15,6 +15,11 @@ gem "turbo-rails"
 # Hotwire's modest JavaScript framework [https://stimulus.hotwired.dev]
 gem "stimulus-rails"
 
+# Use the database-backed adapters for Rails.cache, Active Job, and Action Cable
+gem "solid_cable"
+gem "solid_cache"
+gem "solid_queue"
+
 # Use Active Model has_secure_password [https://guides.rubyonrails.org/active_model_basics.html#securepassword]
 # gem "bcrypt", "~> 3.1.7"
 
