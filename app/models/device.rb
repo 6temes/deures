@@ -24,8 +24,8 @@ class Device < ApplicationRecord
 
   include Tokenized
 
-  # A forgotten device answers to no token, so the cookie resolves to nothing and the installed
-  # icon's start URL pairs the iPad again. The filtering has to happen at the lookup: anywhere
+  # A forgotten device answers to no token, so the cookie resolves to nothing and the iPad has no
+  # identity until a fresh link is opened on it. The filtering has to happen at the lookup: anywhere
   # later and Current.device holds the forgotten row, which is all a paired-or-not check needs
   # to see to treat the iPad as already paired and never re-pair it.
   def self.find_by_token(token)

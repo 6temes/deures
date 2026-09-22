@@ -83,7 +83,7 @@ accessories:
       - config/litestream.yml:/etc/litestream.yml
     cmd: replicate -config /etc/litestream.yml
 
-# Aliases are triggered with "bin/kamal <alias>".
+# Aliases are triggered with "bundle exec kamal <alias>".
 aliases:
   console: app exec --interactive --reuse "bin/rails console"
   dbc: app exec --interactive --reuse "bin/rails dbconsole --include-password"
