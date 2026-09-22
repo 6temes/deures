@@ -22,6 +22,11 @@ Rails.application.configure do
   config.consider_all_requests_local = true
   config.cache_store = :null_store
 
+  # The rate limiter takes its own store, so it gets a real one here while everything else keeps
+  # the null store: counting through a store that forgets is a limit that can never be reached,
+  # and a test of it would pass whether or not the limit existed.
+  config.action_controller.cache_store = :memory_store
+
   # Render exception templates for rescuable exceptions and raise for other exceptions.
   config.action_dispatch.show_exceptions = :rescuable
 

@@ -1,6 +1,13 @@
 class PairingsController < ApplicationController
   MANIFEST_TYPE = "application/manifest+json"
 
+  # A signed token is not worth guessing at, so this is about the cost of being asked rather than
+  # about the odds: the endpoint is public, unauthenticated and writes a row when it succeeds.
+  # Pairing happens a handful of times in an iPad's life, so a limit this high is one no parent
+  # reaches. Counting is by address, which behind the tunnel may well be one address for everyone
+  # — the ceiling is set so that this stays true either way.
+  rate_limit to: 10, within: 1.minute, only: :show
+
   before_action :no_store
   before_action :set_pairing_link, only: :show
 
