@@ -43,6 +43,11 @@ gem "thruster", require: false
 # Deploy this application anywhere as a Docker container [https://kamal-deploy.org]
 gem "kamal", require: false
 
+# Active Storage variants, through libvips. image_processing leaves the vips binding to an
+# optional dependency, so ruby-vips is named too rather than left to resolve by luck.
+gem "image_processing"
+gem "ruby-vips"
+
 # Prometheus metrics, reported to a collector running as a separate Kamal accessory
 gem "prometheus_exporter"
 

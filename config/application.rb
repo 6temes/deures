@@ -28,11 +28,6 @@ module Deures
     # Common ones are `templates`, `generators`, or `middleware`, for example.
     config.autoload_lib(ignore: %w[assets tasks])
 
-    # Nothing here is an image: Active Storage is present for the fleet's deploy shape, not for
-    # uploads. Leaving the processor on warns at every boot that image_processing is missing,
-    # and installing it would put a whole image toolchain in the runtime image for no caller.
-    config.active_storage.variant_processor = :disabled
-
     # Nor does anything here serve or receive a blob over HTTP, and this app is open to the
     # internet with no gate in front of it, so the engine's upload and redirect routes would be
     # a surface with no caller behind it.
