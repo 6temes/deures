@@ -14,7 +14,8 @@ FROM docker.io/library/ruby:$RUBY_VERSION-slim AS base
 # Rails app lives here
 WORKDIR /rails
 
-# Install base packages
+# Install base packages. sqlite3 is the entrypoint's boot guard: it asks the restored file what
+# tables it holds, which a file test cannot answer.
 RUN apt-get update -qq && \
     apt-get install --no-install-recommends -y curl libjemalloc2 sqlite3 && \
     ln -s /usr/lib/$(uname -m)-linux-gnu/libjemalloc.so.2 /usr/local/lib/libjemalloc.so && \

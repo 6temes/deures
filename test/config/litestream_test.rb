@@ -17,6 +17,12 @@ class LitestreamTest < ActiveSupport::TestCase
     end
   end
 
+  test "keeps snapshots longer than the interval that replaces them" do
+    interval, retention = CONFIG[SNAPSHOT].scan(/^  (?:interval|retention): (\d+)h$/).flatten.map(&:to_i)
+
+    assert_operator retention, :>, interval
+  end
+
   test "names no host, address or server path of its own" do
     assert_no_match(/\d+\.\d+\.\d+\.\d+/, CONFIG)
 

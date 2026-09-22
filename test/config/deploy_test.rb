@@ -13,6 +13,20 @@ class DeployTest < ActiveSupport::TestCase
     end
   end
 
+  # The container side of a mount is this image's own and belongs here; a shebang and a shell
+  # redirect belong to every Unix. Anything else absolute is a path on the server, which is
+  # configuration — and the host side of the two Litestream mounts was exactly that until the
+  # list below refused it.
+  IMAGE_PATHS = %w[/dev/null /etc/litestream /home/rails /rails /root/.ssh /up /usr/bin/env]
+
+  test "names no path of the server's own" do
+    FILES.each do |file|
+      file.read.scan(%r{(?<![\w\}/*])/\w[\w./-]*}) do |path|
+        assert path.start_with?(*IMAGE_PATHS), "#{file.basename} names #{path}, which is the server's"
+      end
+    end
+  end
+
   test "names no household domain, server directory or login" do
     FILES.each do |file|
       %w[6temes /srv/ daniel].each do |literal|

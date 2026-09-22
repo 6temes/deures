@@ -76,9 +76,9 @@ accessories:
         LITESTREAM_SFTP_USER: <%= ENV["LITESTREAM_SFTP_USER"] %>
     volumes:
       - "deures_storage:/rails/storage"
-      - "/home/deploy/.ssh/litestream_ed25519:/etc/litestream/sftp_key:ro"
+      - "<%= ENV["LITESTREAM_SSH_KEY_HOST_PATH"] %>:/etc/litestream/sftp_key:ro"
       # This container runs as root, so its known_hosts is root's.
-      - "/home/deploy/.ssh/litestream_known_hosts:/root/.ssh/known_hosts:ro"
+      - "<%= ENV["LITESTREAM_KNOWN_HOSTS_HOST_PATH"] %>:/root/.ssh/known_hosts:ro"
     files:
       - config/litestream.yml:/etc/litestream.yml
     cmd: replicate -config /etc/litestream.yml
@@ -93,9 +93,9 @@ aliases:
 # Use a persistent storage volume for sqlite database files and local Active Storage files.
 volumes:
   - "deures_storage:/rails/storage"
-  - "/home/deploy/.ssh/litestream_ed25519:/etc/litestream/sftp_key:ro"
+  - "<%= ENV["LITESTREAM_SSH_KEY_HOST_PATH"] %>:/etc/litestream/sftp_key:ro"
   # The web container runs as rails, not as root, so it reads known_hosts from that user's home.
-  - "/home/deploy/.ssh/litestream_known_hosts:/home/rails/.ssh/known_hosts:ro"
+  - "<%= ENV["LITESTREAM_KNOWN_HOSTS_HOST_PATH"] %>:/home/rails/.ssh/known_hosts:ro"
 
 # Bridge fingerprinted assets between versions to avoid 404 on in-flight requests.
 asset_path: /rails/public/assets

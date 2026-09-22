@@ -11,7 +11,10 @@
 if [ "${@: -2:1}" == "./bin/rails" ] && [ "${@: -1:1}" == "server" ]; then
   litestream restore -config /etc/litestream.yml -if-db-not-exists -if-replica-exists /rails/storage/production.sqlite3
 
-  if [ ! -f /rails/storage/production.sqlite3 ]; then
+  # A zero-byte file is a valid empty SQLite database, so a present inode does not answer the
+  # question the guard is asking. Count the tables instead, read-only so that a missing file is
+  # an error rather than a new empty one the next boot's restore would then skip over.
+  if [ "$(sqlite3 -readonly /rails/storage/production.sqlite3 'select count(*) from sqlite_schema' 2>/dev/null || echo 0)" = "0" ]; then
     echo "no database at /rails/storage/production.sqlite3, and no restore has put one there: refusing to boot" >&2
     exit 1
   fi

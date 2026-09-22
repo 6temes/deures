@@ -33,6 +33,17 @@ module Deures
     # and installing it would put a whole image toolchain in the runtime image for no caller.
     config.active_storage.variant_processor = :disabled
 
+    # Nor does anything here serve or receive a blob over HTTP, and this app is open to the
+    # internet with no gate in front of it, so the engine's upload and redirect routes would be
+    # a surface with no caller behind it.
+    config.active_storage.draw_routes = false
+
+    # A request to an unrouted path under /p/ raises a routing error whose message quotes the
+    # path, and a rescued response is logged as that message rather than through the filtered
+    # path everything else reads. The pairing token is the whole credential, so the 404 goes:
+    # the request line above it already records the path, scrubbed, and its status.
+    config.action_dispatch.log_rescued_responses = false
+
     # Configuration for the application, engines, and railties goes here.
     #
     # These settings can be overridden in specific environments using the files

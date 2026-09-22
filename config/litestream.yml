@@ -11,9 +11,11 @@ sync-interval: 10s
 
 # Retention is a top-level block from 0.5 onward. The per-replica keys it replaces are not
 # rejected there, they are ignored, so a replica carrying them keeps a retention nobody chose.
+# Retention outlives the interval, because at equal values a snapshot comes due for deletion on
+# the day its replacement is written and the history is never more than one snapshot deep.
 snapshot:
   interval: 24h
-  retention: 24h
+  retention: 72h
 
 # The queue is replicated but never restored on boot: bringing it back would fire every job that
 # came due while the volume was gone. The entrypoint restores the primary alone.

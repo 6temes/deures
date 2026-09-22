@@ -36,6 +36,13 @@ class PairingTokenRedactionTest < ActionDispatch::IntegrationTest
     assert_not_includes @events.to_h.to_s, @token
   end
 
+  test "no log line carries the token when nothing under the pairing path is routed" do
+    get "/p/#{@token}/nothing-is-routed-here"
+    SemanticLogger.flush
+
+    assert_not_includes @events.to_h.to_s, @token
+  end
+
   test "the recorded span carries the scrubbed path under either semantic convention" do
     %w[http.target url.path].each do |attribute|
       span = recorded_span attribute => "/p/#{@token}/icon-512.png"

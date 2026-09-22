@@ -8,9 +8,11 @@ into being, pairing an iPad, and proving the backup is a backup.
 
 ## The first boot
 
-The server refuses to boot when there is no database file, rather than creating an empty one: a
-seeded database replicated over the children's history is the one failure a backup cannot undo.
-So the first deploy of all creates the database once, by hand, before the server first starts:
+The server refuses to boot unless the database it finds has tables in it, rather than creating an
+empty one: a seeded database replicated over the children's history is the one failure a backup
+cannot undo. A zero-byte file is a valid empty SQLite database, so a restore that left one behind
+is refused exactly as an absent file is. So the first deploy of all creates the database once, by
+hand, before the server first starts:
 
 ```bash
 bin/rails db:prepare

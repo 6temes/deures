@@ -1,8 +1,6 @@
 ---
-# Active Storage ships its own engine, routes and controllers. Traceroute walks every loaded
-# controller and every mounted route, so the engine's own pairs look like an app that forgot
-# to route its actions. They are not ours to route, to reach, or to delete.
+# Active Storage ships its own engine and controllers. Its routes are not drawn — see
+# config/application.rb — but traceroute walks every loaded controller, so the engine's actions
+# look like an app that forgot to route them. They are not ours to route, to reach, or to delete.
 ignore_unreachable_actions:
-  - ^active_storage
-ignore_unused_routes:
   - ^active_storage

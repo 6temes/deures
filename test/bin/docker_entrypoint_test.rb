@@ -1,5 +1,6 @@
 require "test_helper"
 require "open3"
+require "sqlite3"
 require "tmpdir"
 
 # The boot gate is the one place that stands between a fresh volume and a replicator copying an
@@ -57,17 +58,29 @@ class DockerEntrypointTest < ActiveSupport::TestCase
     assert_predicate run[:status], :success?
   end
 
+  test "refuses to boot on a zero-byte primary, which SQLite reads as a database with no tables" do
+    run = boot "./bin/thrust", "./bin/rails", "server", empty_database: true
+
+    assert_includes run[:stderr], REFUSAL
+    assert_not_includes run[:stdout], "rails db:prepare"
+    assert_equal 1, run[:status].exitstatus
+  end
+
   private
 
   # Runs the entrypoint with the given arguments in a throwaway container root. `restores` makes
   # the stubbed litestream write the primary, as a real restore from a replica would; `database`
-  # puts one there before it runs, as a redeployed volume would.
-  def boot(*arguments, restores: false, database: false, exit_status: 0)
+  # puts one there before it runs, as a redeployed volume would; `empty_database` puts a
+  # zero-byte file there, which is the shape a half-finished restore leaves behind.
+  def boot(*arguments, restores: false, database: false, empty_database: false, exit_status: 0)
     Dir.mktmpdir do |root|
       storage = File.join(root, "storage")
       FileUtils.mkdir_p storage
       primary = File.join(storage, "production.sqlite3")
-      File.write primary, "" if database
+      populate primary if database
+      File.write primary, "" if empty_database
+      restored = File.join(root, "restored.sqlite3")
+      populate restored if restores
       log = File.join(root, "litestream.log")
 
       write root, "bin/docker-entrypoint", sandboxed(storage)
@@ -76,7 +89,7 @@ class DockerEntrypointTest < ActiveSupport::TestCase
       write root, "stub/litestream", <<~STUB
         #!/bin/bash
         echo "${@}" >> #{log}
-        #{"touch #{primary}" if restores}
+        #{"cp #{restored} #{primary}" if restores}
         if [ #{exit_status} -ne 0 ]; then
           echo "cannot connect to the replica" >&2
         fi
@@ -102,6 +115,13 @@ class DockerEntrypointTest < ActiveSupport::TestCase
   def sandboxed(storage)
     assert_includes ENTRYPOINT, STORAGE
     ENTRYPOINT.gsub(STORAGE, storage)
+  end
+
+  # A database with a table in it, because the guard asks SQLite what the file holds rather than
+  # whether it is there: a zero-byte file is a valid database and would answer the same as one
+  # the restore never wrote.
+  def populate(path)
+    SQLite3::Database.new(path) { it.execute "create table households (id integer primary key)" }
   end
 
   def write(root, path, body)
