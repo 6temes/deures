@@ -1,5 +1,6 @@
 # A token handed out once in plaintext and kept only as a digest: every lookup hashes what the
-# caller presents, so the plaintext is never stored and the row itself is what can be revoked.
+# caller presents, so the plaintext is never stored and the row, not the token, is what a
+# withdrawal has to reach.
 module Tokenized
   extend ActiveSupport::Concern
 

@@ -43,6 +43,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
+      # ruby-vips loads the native library when the app boots, not when a variant is asked for,
+      # so every group needs it even though none of them make an image. The runtime image
+      # installs the same package.
+      - name: Install libvips
+        run: sudo apt-get update -qq && sudo apt-get install --no-install-recommends -y libvips
+
       - name: Set up Ruby
         uses: ruby/setup-ruby@a0102e0972be65f351c307e2d64b9314a57c8073 # v1.324.0
         with:

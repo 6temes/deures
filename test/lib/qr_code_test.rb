@@ -1,13 +1,13 @@
 require "test_helper"
 
 class QrCodeTest < ActiveSupport::TestCase
-  PAIRING_URL = "https://study.example.com/p/#{"a" * 43}"
+  PAIRING_URL = "https://study.example.com/p?token=#{"a" * 43}"
   PINK = "#e0409a"
   CELL = /\e\[[\d;]*m#{QrCode::HALF_BLOCK}/
 
-  test "text past what a version 6 symbol holds raises rather than drawing something unreadable" do
-    assert QrCode.new("a" * 134).version <= 6
-    assert_raises(QrCode::TooLong) { QrCode.new "a" * 135 }
+  test "text past what a version 10 symbol holds raises rather than drawing something unreadable" do
+    assert QrCode.new("a" * 271).version <= 10
+    assert_raises(QrCode::TooLong) { QrCode.new "a" * 272 }
   end
 
   test "the rendered code carries two rows of modules a line, inside a quiet zone" do

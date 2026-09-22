@@ -119,11 +119,12 @@ There is no login form, so a fresh checkout has nothing to look at until a devic
 a link for one of the seeded children and open it:
 
 ```bash
-bin/rails runner 'puts "/p/" + Child.find_by!(name: "Pau").pairing_links.create!.plain_token'
+bin/rails runner 'link = Child.find_by!(name: "Pau").pairing_links.create!; puts Rails.application.routes.url_helpers.pairing_path(token: link.generate_token_for(:invitation))'
 ```
 
 Visit that path, then visit `/`. You are now that child, with twelve cards due and nothing to tap
-but a digit. Answer them all to reach the done screen.
+but a digit. Answer them all to reach the done screen. A link is good for fifteen minutes and
+pairs the one browser that opens it, so mint another when one has gone stale.
 
 > **Prerequisites** Ruby as `.ruby-version` names it, Node as `.nvmrc` does, and a browser.
 > Nothing else — no Redis, no Postgres, no build step, no API key.

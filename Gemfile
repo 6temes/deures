@@ -15,6 +15,11 @@ gem "turbo-rails"
 # Hotwire's modest JavaScript framework [https://stimulus.hotwired.dev]
 gem "stimulus-rails"
 
+# Use the database-backed adapters for Rails.cache, Active Job, and Action Cable
+gem "solid_cable"
+gem "solid_cache"
+gem "solid_queue"
+
 # Use Active Model has_secure_password [https://guides.rubyonrails.org/active_model_basics.html#securepassword]
 # gem "bcrypt", "~> 3.1.7"
 
@@ -34,6 +39,38 @@ gem "bootsnap", require: false
 
 # Add HTTP asset caching/compression and X-Sendfile acceleration to Puma [https://github.com/basecamp/thruster/]
 gem "thruster", require: false
+
+# Deploy this application anywhere as a Docker container [https://kamal-deploy.org]
+gem "kamal", require: false
+
+# Active Storage variants, through libvips. image_processing leaves the vips binding to an
+# optional dependency, so ruby-vips is named too rather than left to resolve by luck.
+gem "image_processing"
+gem "ruby-vips"
+
+# Prometheus metrics, reported to a collector running as a separate Kamal accessory
+gem "prometheus_exporter"
+
+# Error monitoring kept in this app's own database, read through its MCP server. Nobody is
+# watching when a child's iPad hits a 500, so the app has to keep the record itself
+# [https://github.com/6temes/rails-informant]
+gem "rails-informant"
+
+# Structured JSON logging to stdout, so a log line arrives at the collector as fields
+# rather than as a line to be re-parsed [https://github.com/reidmorrison/rails_semantic_logger]
+gem "rails_semantic_logger"
+
+# OpenTelemetry tracing. The instrumentations are listed one by one rather than through a
+# meta-gem so that nothing this app does not run gets loaded; action_mailer is absent because
+# action_mailer/railtie is commented out in config/application.rb.
+gem "opentelemetry-exporter-otlp"
+gem "opentelemetry-instrumentation-action_pack"
+gem "opentelemetry-instrumentation-action_view"
+gem "opentelemetry-instrumentation-active_job"
+gem "opentelemetry-instrumentation-active_support"
+gem "opentelemetry-instrumentation-net_http"
+gem "opentelemetry-instrumentation-rack"
+gem "opentelemetry-sdk"
 
 group :development, :test do
   # Static analysis for security vulnerabilities [https://brakemanscanner.org/]
@@ -68,5 +105,10 @@ end
 group :test do
   # Use system testing [https://guides.rubyonrails.org/testing.html#system-testing]
   gem "capybara"
+
+  # Minitest 6 moved its own Mock and Object#stub out into this gem. It is not a second
+  # mocking library: it is where `stub` lives now.
+  gem "minitest-mock"
+
   gem "selenium-webdriver"
 end

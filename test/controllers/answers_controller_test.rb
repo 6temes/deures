@@ -132,7 +132,7 @@ class AnswersControllerTest < ActionDispatch::IntegrationTest
 
   test "a request that resolves to no child renders the lost-identity screen rather than the no-connection screen" do
     token = show queue_items(:pau_sum_23_19)
-    @device.pairing_link.revoke!
+    @device.forget!
 
     assert_no_difference -> { Attempt.count } do
       submit answer: "42", showing_token: token

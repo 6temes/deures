@@ -2,7 +2,7 @@ require "test_helper"
 
 class ContentSecurityPolicyTest < ActionDispatch::IntegrationTest
   test "the install screen's inline script carries a nonce the header accepts" do
-    get "/p/#{children(:pau).pairing_links.create!.plain_token}"
+    get pairing_path(token: children(:pau).pairing_links.create!.generate_token_for(:invitation))
 
     assert_response :success
     nonce = response.body[/<script nonce="([^"]*)"/, 1]
@@ -16,7 +16,7 @@ class ContentSecurityPolicyTest < ActionDispatch::IntegrationTest
 
   test "a fresh nonce is issued per request" do
     nonces = 2.times.map do
-      get "/p/#{children(:pau).pairing_links.create!.plain_token}"
+      get pairing_path(token: children(:pau).pairing_links.create!.generate_token_for(:invitation))
       response.body[/<script nonce="([^"]*)"/, 1]
     end
 
@@ -24,7 +24,7 @@ class ContentSecurityPolicyTest < ActionDispatch::IntegrationTest
   end
 
   test "style attributes are permitted, and nothing else inline is" do
-    get "/p/#{children(:pau).pairing_links.create!.plain_token}"
+    get pairing_path(token: children(:pau).pairing_links.create!.generate_token_for(:invitation))
 
     policy = response.headers["Content-Security-Policy"]
 

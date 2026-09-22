@@ -1,12 +1,20 @@
 #!/bin/bash -e
 
-# Migrate the database that is already there, and refuse to boot without one. db:prepare would
-# otherwise create and seed an empty database, which a replicator would then copy over the
-# children's history — the one failure a backup cannot undo. No ordering guarantee between a
-# restore and the server is worth trusting here, because a host that reboots brings this
-# container back on its own. The first deploy of all creates the database by hand, once.
+# Put back the database replication holds, migrate the database that is already there, and refuse
+# to boot without one. db:prepare would otherwise create and seed an empty database, which a
+# replicator would then copy over the children's history — the one failure a backup cannot undo.
+# No ordering guarantee between a restore and the server is worth trusting here, because a host
+# that reboots brings this container back on its own. The restore is the primary alone, because
+# restoring the queue would fire every job that came due while the volume was gone; its exit
+# status is not swallowed, so a transport or key error fails the boot rather than reading as an
+# absent replica. The first deploy of all creates the database by hand, once.
 if [ "${@: -2:1}" == "./bin/rails" ] && [ "${@: -1:1}" == "server" ]; then
-  if [ ! -f /rails/storage/production.sqlite3 ]; then
+  litestream restore -config /etc/litestream.yml -if-db-not-exists -if-replica-exists /rails/storage/production.sqlite3
+
+  # A zero-byte file is a valid empty SQLite database, so a present inode does not answer the
+  # question the guard is asking. Count the tables instead, read-only so that a missing file is
+  # an error rather than a new empty one the next boot's restore would then skip over.
+  if [ "$(sqlite3 -readonly /rails/storage/production.sqlite3 'select count(*) from sqlite_schema' 2>/dev/null || echo 0)" = "0" ]; then
     echo "no database at /rails/storage/production.sqlite3, and no restore has put one there: refusing to boot" >&2
     exit 1
   fi

@@ -1,21 +1,20 @@
-# The table stores only a digest, so each fixture writes the digest of a plaintext token a
-# test can hand to PairingLink.find_by_token. The timestamps are UTC: Pau's second link was
-# issued at 08:00 on the 14th in Tokyo, which is where the household lives.
+# The timestamps are UTC: Pau's second link was issued at 08:00 on the 14th in Tokyo, which is
+# where the household lives. A link carries no token of its own — the token is signed from the
+# row and handed out once — so a fixture is the row a link that has already been used leaves,
+# and every one of these has been claimed.
 # == Schema Information
 #
 # Table name: pairing_links
 #
-#  id           :integer          not null, primary key
-#  revoked_at   :datetime
-#  token_digest :string           not null
-#  created_at   :datetime         not null
-#  updated_at   :datetime         not null
-#  child_id     :integer          not null
+#  id         :integer          not null, primary key
+#  claimed_at :datetime
+#  created_at :datetime         not null
+#  updated_at :datetime         not null
+#  child_id   :integer          not null
 #
 # Indexes
 #
-#  index_pairing_links_on_child_id      (child_id)
-#  index_pairing_links_on_token_digest  (token_digest) UNIQUE
+#  index_pairing_links_on_child_id  (child_id)
 #
 # Foreign Keys
 #
@@ -23,18 +22,18 @@
 #
 pau_first:
   child: pau
-  token_digest: <%= Digest::SHA256.hexdigest("pau-first-link") %>
+  claimed_at: 2026-09-01 09:01:00
   created_at: 2026-09-01 09:00:00
   updated_at: 2026-09-01 09:00:00
 
 pau_second:
   child: pau
-  token_digest: <%= Digest::SHA256.hexdigest("pau-second-link") %>
+  claimed_at: 2026-09-13 23:01:00
   created_at: 2026-09-13 23:00:00
   updated_at: 2026-09-13 23:00:00
 
 teo_only:
   child: teo
-  token_digest: <%= Digest::SHA256.hexdigest("teo-only-link") %>
+  claimed_at: 2026-09-01 09:06:00
   created_at: 2026-09-01 09:05:00
   updated_at: 2026-09-01 09:05:00

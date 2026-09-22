@@ -21,6 +21,9 @@ Rails.application.configure do
   # Enable serving of images, stylesheets, and JavaScripts from an asset server.
   # config.asset_host = "http://assets.example.com"
 
+  # Store uploaded files on the local file system (see config/storage.yml for options).
+  config.active_storage.service = :local
+
   # Assume all access to the app is happening through a SSL-terminating reverse proxy.
   config.assume_ssl = true
 
@@ -30,9 +33,19 @@ Rails.application.configure do
   # Skip http-to-https redirect for the default health check endpoint.
   config.ssl_options = {redirect: {exclude: ->(request) { request.path == "/up" }}}
 
-  # Log to stdout with the current request id as a default log tag.
-  config.log_tags = [:request_id]
-  config.logger = ActiveSupport::TaggedLogging.logger($stdout)
+  # Log to stdout as JSON, so a line arrives at the collector as fields rather than as a
+  # sentence something downstream has to parse back apart.
+  config.rails_semantic_logger.appenders do |appenders|
+    appenders.add io: $stdout, formatter: :json
+  end
+
+  # The hash form names each tag, so the trace ids arrive as their own fields and a log line
+  # can be opened as the trace it belongs to.
+  config.log_tags = {
+    request_id: :request_id,
+    span_id: ->(_request) { OpenTelemetry::Trace.current_span.context.hex_span_id if OpenTelemetry::Trace.current_span.context.valid? },
+    trace_id: ->(_request) { OpenTelemetry::Trace.current_span.context.hex_trace_id if OpenTelemetry::Trace.current_span.context.valid? }
+  }
 
   # Change to "debug" to log everything (including potentially personally-identifiable information!).
   config.log_level = ENV.fetch("RAILS_LOG_LEVEL", "info")
@@ -44,10 +57,11 @@ Rails.application.configure do
   config.active_support.report_deprecations = false
 
   # Replace the default in-process memory cache store with a durable alternative.
-  # config.cache_store = :mem_cache_store
+  config.cache_store = :solid_cache_store
 
   # Replace the default in-process and non-durable queuing backend for Active Job.
-  # config.active_job.queue_adapter = :resque
+  config.active_job.queue_adapter = :solid_queue
+  config.solid_queue.connects_to = {database: {writing: :queue}}
 
   # Enable locale fallbacks for I18n (makes lookups for any locale fall back to
   # the I18n.default_locale when a translation cannot be found).

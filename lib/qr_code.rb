@@ -7,16 +7,17 @@ class QrCode
   class TooLong < StandardError; end
 
   # Error correction level L. Redundancy buys little here — the code is read off a screen held
-  # up to a camera, not off paper that can tear — so the capacity is worth more. Version 6 is
-  # the largest a pairing URL needs, and the cap is what keeps a mistyped origin from drawing a
-  # symbol taller than the window it is printed into.
+  # up to a camera, not off paper that can tear — so the capacity is worth more. A pairing URL
+  # is a signed token of about 180 bytes behind an origin, so version 10 and its 271 bytes leave
+  # room for a long host; the cap is what keeps a mistyped origin from drawing a symbol taller
+  # than the window it is printed into.
   LEVEL = :l
   MODE = :byte_8bit
-  MAX_VERSION = 6
+  MAX_VERSION = 10
 
   # The foreground of a character cell is the top half and the background the bottom half,
   # so one line of text carries two rows of modules and each module comes out square. A
-  # version 6 code is 25 lines this way and 49 a row at a time, which is why the renderer is
+  # version 10 code is 33 lines this way and 65 a row at a time, which is why the renderer is
   # still ours. Both colors are stated on every cell: a terminal with a dark theme would
   # otherwise render the code inverted, which many cameras will not read.
   HALF_BLOCK = "▀"

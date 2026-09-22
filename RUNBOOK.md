@@ -8,9 +8,11 @@ into being, pairing an iPad, and proving the backup is a backup.
 
 ## The first boot
 
-The server refuses to boot when there is no database file, rather than creating an empty one: a
-seeded database replicated over the children's history is the one failure a backup cannot undo.
-So the first deploy of all creates the database once, by hand, before the server first starts:
+The server refuses to boot unless the database it finds has tables in it, rather than creating an
+empty one: a seeded database replicated over the children's history is the one failure a backup
+cannot undo. A zero-byte file is a valid empty SQLite database, so a restore that left one behind
+is refused exactly as an absent file is. So the first deploy of all creates the database once, by
+hand, before the server first starts:
 
 ```bash
 bin/rails db:prepare
@@ -69,26 +71,25 @@ Ops::Devices::IssueLink.call child: "Pau"
 
 Point the camera at the code, open it in Safari, then Share and Add to Home Screen. The icon
 comes up in the child's color. Force-quit the app and reopen it from the icon to confirm it
-comes back as that child with nothing to tap. A link never expires and can be opened on as many
-devices as needed.
+comes back as that child with nothing to tap. The link expires fifteen minutes after it is
+issued and pairs the one iPad that opens it, so issue it with that iPad in hand and issue a
+second one for a second iPad. After that the iPad is signed in by its own cookie, and the
+installed icon opens the app itself rather than the link.
 
-Two operations sign an iPad out, and they are not interchangeable:
+One operation signs an iPad out:
 
 ```ruby
-Ops::Devices::Forget.call child: "Pau", confirm: true      # signs the iPads out, keeps the icon working
-Ops::Devices::RevokeLink.call child: "Pau", confirm: true  # kills the link, and the icon with it
+Ops::Devices::Forget.call child: "Pau", confirm: true
 ```
 
-Forgetting leaves the pairing link live, so the icon already on the Home Screen pairs that iPad
-again at the next launch: Pau taps it and his question is there, with nothing to install and
-nothing to tap. That is the re-pair drill — run it on a handover day to prove an iPad that has
-been shut in a drawer for weeks still heals itself. It forgets every device that child has
-signed in, not a chosen one, and the rows stay with their last-seen stamps, so it is still
-possible to tell which iPad was which.
+It signs out every iPad that child has signed in, not a chosen one, and each shows the
+lost-identity screen from then on. The icon stays where it is: issue a fresh link, open it on the
+iPad, and the icon is that child's again with nothing to install. The rows stay with their
+last-seen stamps, so it is still possible to tell which iPad was which.
 
-Revoking takes the link with it, which is the one to reach for when a device has to stay out:
-every iPad that used that link shows the lost-identity screen until a new link is issued and
-added to the Home Screen again.
+It is also the one to reach for when a device has to stay out, and it is enough on its own: the
+only way back in is a link opened on the iPad, and a link is good for fifteen minutes and for the
+one iPad that opens it.
 
 ## The restore drill
 

@@ -23,6 +23,13 @@ require "test_helper"
 #  new_card_cap_is_not_negative     (new_card_cap >= 0)
 #
 class ChildTest < ActiveSupport::TestCase
+  test "a child's devices are read from the child, without the link that introduced them" do
+    sql = children(:pau).devices.to_sql
+
+    assert_no_match(/pairing_links/, sql)
+    assert_match(/"devices"\."child_id"/, sql)
+  end
+
   test "a child whose color is not a palette name is invalid" do
     child = Child.new name: "Mar", color: "chartreuse", created_on: Date.new(2026, 9, 14)
 

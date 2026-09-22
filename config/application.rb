@@ -5,13 +5,13 @@ require "rails"
 require "active_model/railtie"
 require "active_job/railtie"
 require "active_record/railtie"
-# require "active_storage/engine"
+require "active_storage/engine"
 require "action_controller/railtie"
 # require "action_mailer/railtie"
 # require "action_mailbox/engine"
 # require "action_text/engine"
 require "action_view/railtie"
-# require "action_cable/engine"
+require "action_cable/engine"
 require "rails/test_unit/railtie"
 
 # Require the gems listed in Gemfile, including any gems
@@ -27,6 +27,12 @@ module Deures
     # not contain `.rb` files, or that should not be reloaded or eager loaded.
     # Common ones are `templates`, `generators`, or `middleware`, for example.
     config.autoload_lib(ignore: %w[assets tasks])
+
+    # A request to an unrouted path under /p/ raises a routing error whose message quotes the
+    # path, and a rescued response is logged as that message rather than through the filtered
+    # path everything else reads. The pairing token is the whole credential, so the 404 goes:
+    # the request line above it already records the path, scrubbed, and its status.
+    config.action_dispatch.log_rescued_responses = false
 
     # Configuration for the application, engines, and railties goes here.
     #

@@ -10,7 +10,35 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_14_090011) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_22_210000) do
+  create_table "active_storage_attachments", force: :cascade do |t|
+    t.bigint "blob_id", null: false
+    t.datetime "created_at", null: false
+    t.string "name", null: false
+    t.bigint "record_id", null: false
+    t.string "record_type", null: false
+    t.index ["blob_id"], name: "index_active_storage_attachments_on_blob_id"
+    t.index ["record_type", "record_id", "name", "blob_id"], name: "index_active_storage_attachments_uniqueness", unique: true
+  end
+
+  create_table "active_storage_blobs", force: :cascade do |t|
+    t.bigint "byte_size", null: false
+    t.string "checksum"
+    t.string "content_type"
+    t.datetime "created_at", null: false
+    t.string "filename", null: false
+    t.string "key", null: false
+    t.text "metadata"
+    t.string "service_name", null: false
+    t.index ["key"], name: "index_active_storage_blobs_on_key", unique: true
+  end
+
+  create_table "active_storage_variant_records", force: :cascade do |t|
+    t.bigint "blob_id", null: false
+    t.string "variation_digest", null: false
+    t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
+  end
+
   create_table "attempts", force: :cascade do |t|
     t.json "accepted_keys", null: false
     t.text "answer", null: false
@@ -95,13 +123,13 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_14_090011) do
   end
 
   create_table "devices", force: :cascade do |t|
+    t.integer "child_id", null: false
     t.datetime "created_at", null: false
     t.datetime "forgotten_at"
     t.datetime "last_seen_at"
-    t.integer "pairing_link_id", null: false
     t.string "token_digest", null: false
     t.datetime "updated_at", null: false
-    t.index ["pairing_link_id"], name: "index_devices_on_pairing_link_id"
+    t.index ["child_id"], name: "index_devices_on_child_id"
     t.index ["token_digest"], name: "index_devices_on_token_digest", unique: true
   end
 
@@ -111,14 +139,63 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_14_090011) do
     t.datetime "updated_at", null: false
   end
 
+  create_table "informant_error_groups", force: :cascade do |t|
+    t.string "controller_action"
+    t.datetime "created_at", null: false
+    t.integer "duplicate_of_id"
+    t.string "error_class", null: false
+    t.string "fingerprint", null: false
+    t.string "first_backtrace_line"
+    t.datetime "first_seen_at", null: false
+    t.datetime "fix_deployed_at"
+    t.string "fix_pr_url"
+    t.string "fix_sha"
+    t.string "job_class"
+    t.datetime "last_notified_at"
+    t.datetime "last_occurrence_stored_at"
+    t.datetime "last_seen_at", null: false
+    t.text "message"
+    t.text "notes"
+    t.string "original_sha"
+    t.datetime "resolved_at"
+    t.string "severity", default: "error"
+    t.string "status", default: "unresolved", null: false
+    t.integer "total_occurrences", default: 0, null: false
+    t.datetime "updated_at", null: false
+    t.index ["duplicate_of_id"], name: "index_informant_error_groups_on_duplicate_of_id"
+    t.index ["error_class"], name: "index_informant_error_groups_on_error_class"
+    t.index ["fingerprint"], name: "index_informant_error_groups_on_fingerprint", unique: true
+    t.index ["status", "last_seen_at"], name: "index_informant_error_groups_on_status_and_last_seen_at"
+    t.index ["status", "original_sha"], name: "index_informant_error_groups_on_status_and_original_sha"
+    t.index ["status", "resolved_at"], name: "index_informant_error_groups_on_status_and_resolved_at"
+    t.index ["status", "total_occurrences"], name: "index_informant_error_groups_on_status_and_total_occurrences"
+    t.index ["status", "updated_at"], name: "index_informant_error_groups_on_status_and_updated_at"
+    t.check_constraint "duplicate_of_id IS NULL OR duplicate_of_id != id", name: "check_no_self_duplicate"
+  end
+
+  create_table "informant_occurrences", force: :cascade do |t|
+    t.json "backtrace"
+    t.json "breadcrumbs"
+    t.datetime "created_at", null: false
+    t.json "custom_context"
+    t.json "environment_context"
+    t.integer "error_group_id", null: false
+    t.json "exception_chain"
+    t.string "git_sha"
+    t.json "request_context"
+    t.datetime "updated_at", null: false
+    t.json "user_context"
+    t.index ["created_at"], name: "index_informant_occurrences_on_created_at"
+    t.index ["error_group_id", "created_at"], name: "index_informant_occurrences_on_error_group_id_and_created_at"
+    t.index ["error_group_id"], name: "index_informant_occurrences_on_error_group_id"
+  end
+
   create_table "pairing_links", force: :cascade do |t|
     t.integer "child_id", null: false
+    t.datetime "claimed_at"
     t.datetime "created_at", null: false
-    t.datetime "revoked_at"
-    t.string "token_digest", null: false
     t.datetime "updated_at", null: false
     t.index ["child_id"], name: "index_pairing_links_on_child_id"
-    t.index ["token_digest"], name: "index_pairing_links_on_token_digest", unique: true
   end
 
   create_table "queue_items", force: :cascade do |t|
@@ -157,6 +234,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_14_090011) do
     t.index ["child_id", "study_date"], name: "index_study_days_on_child_id_and_study_date", unique: true
   end
 
+  add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "attempts", "cards"
   add_foreign_key "attempts", "children"
   add_foreign_key "card_progresses", "cards"
@@ -164,7 +243,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_14_090011) do
   add_foreign_key "cards", "decks"
   add_foreign_key "deck_assignments", "children"
   add_foreign_key "deck_assignments", "decks"
-  add_foreign_key "devices", "pairing_links"
+  add_foreign_key "devices", "children"
+  add_foreign_key "informant_error_groups", "informant_error_groups", column: "duplicate_of_id"
+  add_foreign_key "informant_occurrences", "informant_error_groups", column: "error_group_id"
   add_foreign_key "pairing_links", "children"
   add_foreign_key "queue_items", "cards", on_delete: :nullify
   add_foreign_key "queue_items", "study_days"
