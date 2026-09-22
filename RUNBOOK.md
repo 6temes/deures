@@ -71,26 +71,26 @@ Ops::Devices::IssueLink.call child: "Pau"
 
 Point the camera at the code, open it in Safari, then Share and Add to Home Screen. The icon
 comes up in the child's color. Force-quit the app and reopen it from the icon to confirm it
-comes back as that child with nothing to tap. A link never expires and can be opened on as many
-devices as needed.
+comes back as that child with nothing to tap. The link expires fifteen minutes after it is
+issued and pairs the one iPad that opens it, so issue it with that iPad in hand and issue a
+second one for a second iPad. After that the iPad is signed in by its own cookie, and the
+installed icon opens the app itself rather than the link.
 
 Two operations sign an iPad out, and they are not interchangeable:
 
 ```ruby
-Ops::Devices::Forget.call child: "Pau", confirm: true      # signs the iPads out, keeps the icon working
-Ops::Devices::RevokeLink.call child: "Pau", confirm: true  # kills the link, and the icon with it
+Ops::Devices::Forget.call child: "Pau", confirm: true      # signs the iPads out, keeps the icon installed
+Ops::Devices::RevokeLink.call child: "Pau", confirm: true  # kills the link, and every iPad that used it
 ```
 
-Forgetting leaves the pairing link live, so the icon already on the Home Screen pairs that iPad
-again at the next launch: Pau taps it and his question is there, with nothing to install and
-nothing to tap. That is the re-pair drill — run it on a handover day to prove an iPad that has
-been shut in a drawer for weeks still heals itself. It forgets every device that child has
-signed in, not a chosen one, and the rows stay with their last-seen stamps, so it is still
-possible to tell which iPad was which.
+Forgetting signs the iPads out and leaves the icon where it is: issue a fresh link, open it on
+the iPad, and the icon is that child's again with nothing to install. It forgets every device
+that child has signed in, not a chosen one, and the rows stay with their last-seen stamps, so it
+is still possible to tell which iPad was which.
 
-Revoking takes the link with it, which is the one to reach for when a device has to stay out:
-every iPad that used that link shows the lost-identity screen until a new link is issued and
-added to the Home Screen again.
+Revoking goes further, and is the one to reach for when a device has to stay out: it cuts off
+every iPad that ever used that link, however long ago it paired, and each shows the lost-identity
+screen until a new link is opened on it.
 
 ## The restore drill
 

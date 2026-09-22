@@ -123,7 +123,8 @@ bin/rails runner 'puts "/p?token=" + Child.find_by!(name: "Pau").pairing_links.c
 ```
 
 Visit that path, then visit `/`. You are now that child, with twelve cards due and nothing to tap
-but a digit. Answer them all to reach the done screen.
+but a digit. Answer them all to reach the done screen. A link is good for fifteen minutes and
+pairs the one browser that opens it, so mint another when one has gone stale.
 
 > **Prerequisites** Ruby as `.ruby-version` names it, Node as `.nvmrc` does, and a browser.
 > Nothing else — no Redis, no Postgres, no build step, no API key.

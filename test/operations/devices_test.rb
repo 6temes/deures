@@ -56,6 +56,13 @@ class DevicesTest < ActiveSupport::TestCase
     assert_includes out, "#{QrCode::FRAME.fetch(:bottom_left)}#{QrCode::FRAME.fetch(:horizontal)} Pau "
   end
 
+  test "issuing a pairing link says when it expires, so the parent knows the deadline to scan it" do
+    out, = capture_io { Ops::Devices::IssueLink.call child: "Pau" }
+
+    assert_includes out, "expires 08:45"
+    assert_equal PairingLink::WINDOW.from_now, children(:pau).pairing_links.order(:id).last.expires_at
+  end
+
   test "issuing a link against another origin prints that origin" do
     out, = capture_io { Ops::Devices::IssueLink.call child: "Teo", at: "http://192.168.1.44:3000" }
 

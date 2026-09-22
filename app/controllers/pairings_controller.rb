@@ -3,24 +3,18 @@ class PairingsController < ApplicationController
   # file path out of a column an agent operation can write.
   ICONS = Child::COLORS.keys.index_with { Rails.root.join("app/assets/images/icons/#{it}-180.png").binread }.freeze
   ICONS_512 = Child::COLORS.keys.index_with { Rails.root.join("app/assets/images/icons/#{it}-512.png").binread }.freeze
-  LAUNCH = {launch: "1"}.freeze
   MANIFEST_TYPE = "application/manifest+json"
 
   # The device cookie is resolved here as on any other request, rather than skipped with
-  # allow_unauthenticated_access, because the installed icon replays this path on every launch and
-  # the device it already resolves to is the one to reuse; skipping it grows a device row a launch.
+  # allow_unauthenticated_access: the link is claimed by the iPad that pairs through it, and the
+  # cookie is what says the manifest and icon requests that follow come from that same iPad.
   before_action :no_store
   before_action :set_pairing_link
-
-  helper_method :launch_url
 
   def show
     return lost_identity unless @pairing_link
 
     pair_device
-    return redirect_to "/" if launched?
-
-    render :show
   end
 
   # Built here rather than in a template: a manifest is a JSON body, and an ERB view would only
@@ -31,7 +25,7 @@ class PairingsController < ApplicationController
     render json: {
       name: @child.name,
       short_name: @child.name,
-      start_url: launch_url,
+      start_url: root_path,
       scope: "/",
       display: "standalone",
       theme_color: @child.color_hex,
@@ -57,14 +51,6 @@ class PairingsController < ApplicationController
 
   private
 
-  def launched?
-    params[:launch].present?
-  end
-
-  def launch_url
-    pairing_path token: @token, **LAUNCH
-  end
-
   def lost_identity
     render "shared/lost_identity", status: :not_found
   end
@@ -77,7 +63,7 @@ class PairingsController < ApplicationController
 
   def set_pairing_link
     link = PairingLink.find_by_token params[:token]
-    return if link.nil? || link.revoked?
+    return unless link&.usable_by?(Current.device)
 
     @pairing_link = link
     @child = link.child

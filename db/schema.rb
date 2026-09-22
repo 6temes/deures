@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_22_002527) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_22_110000) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.bigint "blob_id", null: false
     t.datetime "created_at", null: false
@@ -192,7 +192,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_22_002527) do
 
   create_table "pairing_links", force: :cascade do |t|
     t.integer "child_id", null: false
+    t.datetime "claimed_at"
     t.datetime "created_at", null: false
+    t.datetime "expires_at", null: false
     t.datetime "revoked_at"
     t.string "token_digest", null: false
     t.datetime "updated_at", null: false

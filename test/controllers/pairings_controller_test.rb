@@ -18,38 +18,99 @@ class PairingsControllerTest < ActionDispatch::IntegrationTest
     assert_select "link[rel=apple-touch-icon][href=?]", "/p/icon-180.png?token=#{@token}"
   end
 
-  test "opening the link with the launch marker sets the cookie and redirects to the root, rendering no install view" do
-    get "/p?token=#{@token}&launch=1"
-
-    assert_redirected_to "/"
-    assert_equal @child, Device.find_by_token(cookies[Authentication::COOKIE]).child
-  end
-
-  test "a relaunch from the installed icon reuses the device the cookie already resolves to" do
+  test "the link is claimed by the device that pairs through it, and that device reopening it is not paired a second time" do
     get "/p?token=#{@token}"
 
+    assert_predicate @link.reload, :claimed?
     assert_equal 1, @link.devices.count
 
     assert_no_difference -> { Device.count } do
-      get "/p?token=#{@token}&launch=1"
-      get "/p?token=#{@token}&launch=1"
+      get "/p?token=#{@token}"
     end
 
+    assert_response :success
     assert_equal @child, Device.find_by_token(cookies[Authentication::COOKIE]).child
   end
 
-  test "an iPad whose device the agent forgot pairs itself again at the next launch from the icon (AE17)" do
+  test "the same token presented by another iPad pairs nothing and renders the lost-identity screen" do
+    get "/p?token=#{@token}"
+
+    other_ipad = open_session
+
+    assert_no_difference -> { Device.count } do
+      other_ipad.get "/p?token=#{@token}"
+    end
+
+    assert_equal 404, other_ipad.response.status
+    assert_select other_ipad.html_document.root, "[data-screen=lost-identity]"
+    assert_empty other_ipad.cookies[Authentication::COOKIE].to_s
+  end
+
+  test "a link past its window pairs nothing, even though no device has claimed it" do
+    travel PairingLink::WINDOW + 1.second
+
+    assert_no_difference -> { Device.count } do
+      get "/p?token=#{@token}"
+    end
+
+    assert_response :not_found
+    assert_select "[data-screen=lost-identity]"
+    assert_empty cookies[Authentication::COOKIE].to_s
+  end
+
+  test "the iPad that claimed the link still fetches the manifest and both icons the install view asks for" do
+    get "/p?token=#{@token}"
+
+    assert_predicate @link.reload, :claimed?
+
+    get "/p/manifest.webmanifest?token=#{@token}"
+
+    assert_response :success
+
+    get "/p/icon-180.png?token=#{@token}"
+
+    assert_response :success
+
+    get "/p/icon-512.png?token=#{@token}"
+
+    assert_response :success
+  end
+
+  test "revoking the link still signs out the iPad that paired through it" do
+    travel_to Time.utc(2026, 9, 13, 23, 30)
+    get "/p?token=#{@token}"
+    get "/"
+
+    assert_select "[data-screen=study]"
+
+    @link.revoke!
+
+    get "/"
+
+    assert_response :success
+    assert_select "[data-screen=lost-identity]"
+    assert_select "[data-screen=study]", false
+  end
+
+  test "an iPad whose device the agent forgot pairs again from a freshly issued link, not from the spent one (AE17)" do
     travel_to Time.utc(2026, 9, 13, 23, 30)
     get "/p?token=#{@token}"
     forgotten_cookie = cookies[Authentication::COOKIE]
 
     capture_io { Ops::Devices::Forget.call child: @child.name, confirm: true }
 
-    assert_difference -> { Device.count }, 1 do
-      get "/p?token=#{@token}&launch=1"
+    assert_no_difference -> { Device.count } do
+      get "/p?token=#{@token}"
     end
 
-    assert_redirected_to "/"
+    assert_response :not_found
+
+    issued = @child.pairing_links.create!
+
+    assert_difference -> { Device.count }, 1 do
+      get "/p?token=#{issued.plain_token}"
+    end
+
     assert_not_equal forgotten_cookie, cookies[Authentication::COOKIE]
     assert_equal @child, Device.find_by_token(cookies[Authentication::COOKIE]).child
 
@@ -60,7 +121,7 @@ class PairingsControllerTest < ActionDispatch::IntegrationTest
     assert_select ".question", "23 + 19"
   end
 
-  test "a forgotten device's cookie alone, without the icon replaying the link, gets the grown-up screen (AE17)" do
+  test "a forgotten device's cookie alone gets the grown-up screen (AE17)" do
     travel_to Time.utc(2026, 9, 13, 23, 30)
     get "/p?token=#{@token}"
 
@@ -79,18 +140,19 @@ class PairingsControllerTest < ActionDispatch::IntegrationTest
     get "/p?token=#{other.plain_token}"
 
     assert_difference -> { Device.count }, 1 do
-      get "/p?token=#{@token}&launch=1"
+      get "/p?token=#{@token}"
     end
 
     assert_equal @child, Device.find_by_token(cookies[Authentication::COOKIE]).child
   end
 
-  test "the manifest's start URL carries both the token and the launch marker, and stays inside the root scope" do
+  test "the manifest's start URL is the root, carrying no token, and stays inside the root scope" do
     get "/p/manifest.webmanifest?token=#{@token}"
 
     assert_response :success
     manifest = JSON.parse response.body
-    assert_equal "/p?launch=1&token=#{@token}", manifest["start_url"]
+    assert_equal "/", manifest["start_url"]
+    assert_not_includes manifest["start_url"], @token
     assert_equal "/", manifest["scope"]
     assert_equal "standalone", manifest["display"]
     assert_equal @child.name, manifest["name"]
@@ -179,13 +241,20 @@ class PairingsControllerTest < ActionDispatch::IntegrationTest
     assert_equal 0, @link.devices.count
   end
 
-  test "opening a revoked link with the launch marker renders the lost-identity screen too" do
-    @link.revoke!
+  test "an expired link gets no icon, at either size, and no manifest" do
+    travel PairingLink::WINDOW + 1.second
 
-    get "/p?token=#{@token}&launch=1"
+    get "/p/icon-180.png?token=#{@token}"
 
     assert_response :not_found
-    assert_select "[data-screen=lost-identity]"
+
+    get "/p/icon-512.png?token=#{@token}"
+
+    assert_response :not_found
+
+    get "/p/manifest.webmanifest?token=#{@token}"
+
+    assert_response :not_found
   end
 
   test "opening an unknown token renders the same screen without leaking whether the token ever existed" do

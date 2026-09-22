@@ -1,8 +1,9 @@
 require "test_helper"
 
 # Informant keeps what it captures in this app's own database, which Litestream replicates off
-# the house. A pairing URL signs an iPad in as a child and never expires, so a captured 500 on
-# a pairing path must not be the copy of that credential everything else was scrubbed to avoid.
+# the house. A pairing URL signs an iPad in as a child for as long as the link is live, so a
+# captured 500 on a pairing path must not be the copy of that credential everything else was
+# scrubbed to avoid.
 class InformantPairingTokenTest < ActionDispatch::IntegrationTest
   setup do
     @link = children(:pau).pairing_links.create!

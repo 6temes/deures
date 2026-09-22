@@ -4,7 +4,7 @@ module Ops
       include Lookups
 
       operation name: "devices.forget",
-        description: "Forget a child's devices, so the next launch of the installed icon pairs itself again.",
+        description: "Forget a child's devices, so each iPad signs in again from a link issued for it.",
         example: %(Ops::Devices::Forget.call child: "Pau", confirm: true),
         confirm: true
 
@@ -26,7 +26,7 @@ module Ops
       private
 
       def live_links(child)
-        child.pairing_links.where(revoked_at: nil).count
+        child.pairing_links.live.count
       end
 
       def signed_in(child)
@@ -54,7 +54,8 @@ module Ops
         url = "#{@origin}#{Rails.application.routes.url_helpers.pairing_path(token: link.plain_token)}"
 
         puts QrCode.render(url, caption: child.name, color: child.color_hex)
-        "#{child.name}: pairing links #{before} → #{child.pairing_links.count}, #{url}"
+        "#{child.name}: pairing links #{before} → #{child.pairing_links.count}, " \
+          "expires #{link.expires_at.strftime("%H:%M")} and pairs one iPad, #{url}"
       end
     end
 

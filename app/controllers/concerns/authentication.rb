@@ -30,7 +30,7 @@ module Authentication
   end
 
   def start_pairing_for(pairing_link)
-    pairing_link.devices.create!.tap do |device|
+    pairing_link.pair!.tap do |device|
       Current.device = device
       write_pairing_cookie device.plain_token
     end
