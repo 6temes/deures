@@ -40,10 +40,11 @@ env:
     APP_HOST: <%= ENV["APP_HOST"] %>
     # The entrypoint restores the primary database from the replica on a fresh volume, so the
     # web container needs the same SFTP target as the litestream accessory; without host and
-    # user the restore aborts with "host required for sftp replica". The key and known_hosts it
-    # reads are mounted in the volumes block below.
+    # user the restore aborts with "host required for sftp replica". The key it reads is mounted
+    # in the volumes block below.
     LITESTREAM_REPLICA_ROOT: <%= ENV["LITESTREAM_REPLICA_ROOT"] %>
     LITESTREAM_SFTP_HOST: <%= ENV["LITESTREAM_SFTP_HOST"] %>
+    LITESTREAM_SFTP_HOST_KEY: <%= ENV["LITESTREAM_SFTP_HOST_KEY"] %>
     LITESTREAM_SFTP_USER: <%= ENV["LITESTREAM_SFTP_USER"] %>
     OTEL_EXPORTER_OTLP_ENDPOINT: http://<%= ENV["WG_MAINFRAME_IP"] %>:4318
     OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
@@ -73,12 +74,11 @@ accessories:
       clear:
         LITESTREAM_REPLICA_ROOT: <%= ENV["LITESTREAM_REPLICA_ROOT"] %>
         LITESTREAM_SFTP_HOST: <%= ENV["LITESTREAM_SFTP_HOST"] %>
+        LITESTREAM_SFTP_HOST_KEY: <%= ENV["LITESTREAM_SFTP_HOST_KEY"] %>
         LITESTREAM_SFTP_USER: <%= ENV["LITESTREAM_SFTP_USER"] %>
     volumes:
       - "deures_storage:/rails/storage"
       - "<%= ENV["LITESTREAM_SSH_KEY_HOST_PATH"] %>:/etc/litestream/sftp_key:ro"
-      # This container runs as root, so its known_hosts is root's.
-      - "<%= ENV["LITESTREAM_KNOWN_HOSTS_HOST_PATH"] %>:/root/.ssh/known_hosts:ro"
     files:
       - config/litestream.yml:/etc/litestream.yml
     cmd: replicate -config /etc/litestream.yml
@@ -94,8 +94,6 @@ aliases:
 volumes:
   - "deures_storage:/rails/storage"
   - "<%= ENV["LITESTREAM_SSH_KEY_HOST_PATH"] %>:/etc/litestream/sftp_key:ro"
-  # The web container runs as rails, not as root, so it reads known_hosts from that user's home.
-  - "<%= ENV["LITESTREAM_KNOWN_HOSTS_HOST_PATH"] %>:/home/rails/.ssh/known_hosts:ro"
 
 # Bridge fingerprinted assets between versions to avoid 404 on in-flight requests.
 asset_path: /rails/public/assets
