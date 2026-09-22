@@ -5,7 +5,7 @@ require "test_helper"
 # Table name: pairing_links
 #
 #  id         :integer          not null, primary key
-#  revoked_at :datetime
+#  claimed_at :datetime
 #  created_at :datetime         not null
 #  updated_at :datetime         not null
 #  child_id   :integer          not null
@@ -29,7 +29,7 @@ class PairingLinkTest < ActiveSupport::TestCase
     link = children(:pau).pairing_links.create!
     token = link.generate_token_for(:invitation)
 
-    link.devices.create!
+    link.claim!
 
     assert_nil PairingLink.find_by_token_for(:invitation, token)
   end
@@ -59,32 +59,20 @@ class PairingLinkTest < ActiveSupport::TestCase
     assert_equal children(:pau), PairingLink.find_by_token_for(:invitation, token).child
   end
 
-  test "issuing a second link for a child leaves the first link's devices working" do
-    first = children(:pau).pairing_links.create!
-    device = first.devices.create!
+  test "claiming a link hands the child a device and is what spends the link" do
+    link = children(:pau).pairing_links.create!
+
+    device = link.claim!
+
+    assert_equal children(:pau), device.child
+    assert_predicate link.reload, :claimed_at?
+  end
+
+  test "the iPad a link paired keeps working once a second link is issued for the child" do
+    device = children(:pau).pairing_links.create!.claim!
 
     children(:pau).pairing_links.create!
 
     assert_equal children(:pau), Device.find_by_token(device.plain_token).child
-  end
-
-  test "revoking a link signs its devices out while the token it minted stays spent" do
-    link = children(:pau).pairing_links.create!
-    device = link.devices.create!
-
-    link.revoke!
-
-    assert_predicate link, :revoked?
-    assert_nil Device.find_by_token(device.plain_token).child
-  end
-
-  test "revoking a link that no iPad has used leaves its token verifying, for the controller to refuse" do
-    link = children(:pau).pairing_links.create!
-    token = link.generate_token_for(:invitation)
-
-    link.revoke!
-
-    assert_equal link, PairingLink.find_by_token_for(:invitation, token)
-    assert_predicate PairingLink.find_by_token_for(:invitation, token), :revoked?
   end
 end

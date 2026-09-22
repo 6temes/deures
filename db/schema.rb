@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_22_200000) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_22_210000) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.bigint "blob_id", null: false
     t.datetime "created_at", null: false
@@ -123,13 +123,13 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_22_200000) do
   end
 
   create_table "devices", force: :cascade do |t|
+    t.integer "child_id", null: false
     t.datetime "created_at", null: false
     t.datetime "forgotten_at"
     t.datetime "last_seen_at"
-    t.integer "pairing_link_id", null: false
     t.string "token_digest", null: false
     t.datetime "updated_at", null: false
-    t.index ["pairing_link_id"], name: "index_devices_on_pairing_link_id"
+    t.index ["child_id"], name: "index_devices_on_child_id"
     t.index ["token_digest"], name: "index_devices_on_token_digest", unique: true
   end
 
@@ -192,8 +192,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_22_200000) do
 
   create_table "pairing_links", force: :cascade do |t|
     t.integer "child_id", null: false
+    t.datetime "claimed_at"
     t.datetime "created_at", null: false
-    t.datetime "revoked_at"
     t.datetime "updated_at", null: false
     t.index ["child_id"], name: "index_pairing_links_on_child_id"
   end
@@ -243,7 +243,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_22_200000) do
   add_foreign_key "cards", "decks"
   add_foreign_key "deck_assignments", "children"
   add_foreign_key "deck_assignments", "decks"
-  add_foreign_key "devices", "pairing_links"
+  add_foreign_key "devices", "children"
   add_foreign_key "informant_error_groups", "informant_error_groups", column: "duplicate_of_id"
   add_foreign_key "informant_occurrences", "informant_error_groups", column: "error_group_id"
   add_foreign_key "pairing_links", "children"

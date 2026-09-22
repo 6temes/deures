@@ -4,13 +4,12 @@ class DevicesTest < ActiveSupport::TestCase
   # 23:30 UTC on the 13th is 08:30 Tokyo on the 14th, the date the fixtures call today.
   setup { travel_to Time.utc(2026, 9, 13, 23, 30) }
 
-  test "forgetting a child's devices signs their iPads out while their pairing links stay live" do
+  test "forgetting a child's devices signs every one of their iPads out, and a fresh link pairs again" do
     out, = capture_io { Ops::Devices::Forget.call child: "Pau", confirm: true }
 
     assert_nil Device.find_by_token("pau-ipad-device")
     assert_nil Device.find_by_token("pau-spare-device")
-    assert_not_predicate pairing_links(:pau_first), :revoked?
-    assert_equal children(:pau), pairing_links(:pau_first).devices.create!.child
+    assert_equal children(:pau), children(:pau).pairing_links.create!.claim!.child
     assert_equal 1, out.lines.size
     assert_includes out, "2 → 0"
   end
@@ -68,40 +67,5 @@ class DevicesTest < ActiveSupport::TestCase
     out, = capture_io { Ops::Devices::IssueLink.call child: "Teo", at: "http://192.168.1.44:3000" }
 
     assert_includes out, "http://192.168.1.44:3000/p?token="
-  end
-
-  test "revoking a link signs out its devices while another link's devices keep working" do
-    out, = capture_io { Ops::Devices::RevokeLink.call child: "Pau", issued_on: "2026-09-01", confirm: true }
-
-    assert_nil Device.find_by_token("pau-ipad-device").child
-    assert_equal children(:pau), Device.find_by_token("pau-spare-device").child
-    assert_equal children(:teo), Device.find_by_token("teo-ipad-device").child
-    assert_equal 1, out.lines.size
-    assert_includes out, "2 → 1"
-  end
-
-  test "revoking without a date revokes every link the child still has" do
-    capture_io { Ops::Devices::RevokeLink.call child: "Pau", confirm: true }
-
-    assert_nil Device.find_by_token("pau-ipad-device").child
-    assert_nil Device.find_by_token("pau-spare-device").child
-    assert_equal children(:teo), Device.find_by_token("teo-ipad-device").child
-  end
-
-  test "revoking a link without the confirmation keyword prints the plan and changes nothing" do
-    out, = capture_io { Ops::Devices::RevokeLink.call child: "Pau" }
-
-    assert_includes out, "plan (nothing changed, pass confirm: true)"
-    assert_equal children(:pau), Device.find_by_token("pau-ipad-device").child
-  end
-
-  test "revoking when the child has no link left is refused" do
-    capture_io { Ops::Devices::RevokeLink.call child: "Pau", confirm: true }
-
-    refusal = assert_raises Ops::Base::Refused do
-      capture_io { Ops::Devices::RevokeLink.call child: "Pau", confirm: true }
-    end
-
-    assert_includes refusal.message, "Pau"
   end
 end

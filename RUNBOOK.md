@@ -76,21 +76,20 @@ issued and pairs the one iPad that opens it, so issue it with that iPad in hand 
 second one for a second iPad. After that the iPad is signed in by its own cookie, and the
 installed icon opens the app itself rather than the link.
 
-Two operations sign an iPad out, and they are not interchangeable:
+One operation signs an iPad out:
 
 ```ruby
-Ops::Devices::Forget.call child: "Pau", confirm: true      # signs the iPads out, keeps the icon installed
-Ops::Devices::RevokeLink.call child: "Pau", confirm: true  # kills the link, and every iPad that used it
+Ops::Devices::Forget.call child: "Pau", confirm: true
 ```
 
-Forgetting signs the iPads out and leaves the icon where it is: issue a fresh link, open it on
-the iPad, and the icon is that child's again with nothing to install. It forgets every device
-that child has signed in, not a chosen one, and the rows stay with their last-seen stamps, so it
-is still possible to tell which iPad was which.
+It signs out every iPad that child has signed in, not a chosen one, and each shows the
+lost-identity screen from then on. The icon stays where it is: issue a fresh link, open it on the
+iPad, and the icon is that child's again with nothing to install. The rows stay with their
+last-seen stamps, so it is still possible to tell which iPad was which.
 
-Revoking goes further, and is the one to reach for when a device has to stay out: it cuts off
-every iPad that ever used that link, however long ago it paired, and each shows the lost-identity
-screen until a new link is opened on it.
+It is also the one to reach for when a device has to stay out, and it is enough on its own: the
+only way back in is a link opened on the iPad, and a link is good for fifteen minutes and for the
+one iPad that opens it.
 
 ## The restore drill
 

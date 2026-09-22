@@ -53,6 +53,7 @@ class Child < ApplicationRecord
   has_many :card_progresses, dependent: :destroy
   has_many :deck_assignments, dependent: :destroy
   has_many :decks, through: :deck_assignments
+  has_many :devices, dependent: :destroy
   has_many :pairing_links, dependent: :destroy
   has_many :study_days, dependent: :destroy
 

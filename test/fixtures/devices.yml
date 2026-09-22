@@ -2,32 +2,32 @@
 #
 # Table name: devices
 #
-#  id              :integer          not null, primary key
-#  forgotten_at    :datetime
-#  last_seen_at    :datetime
-#  token_digest    :string           not null
-#  created_at      :datetime         not null
-#  updated_at      :datetime         not null
-#  pairing_link_id :integer          not null
+#  id           :integer          not null, primary key
+#  forgotten_at :datetime
+#  last_seen_at :datetime
+#  token_digest :string           not null
+#  created_at   :datetime         not null
+#  updated_at   :datetime         not null
+#  child_id     :integer          not null
 #
 # Indexes
 #
-#  index_devices_on_pairing_link_id  (pairing_link_id)
-#  index_devices_on_token_digest     (token_digest) UNIQUE
+#  index_devices_on_child_id      (child_id)
+#  index_devices_on_token_digest  (token_digest) UNIQUE
 #
 # Foreign Keys
 #
-#  pairing_link_id  (pairing_link_id => pairing_links.id)
+#  child_id  (child_id => children.id)
 #
 pau_ipad:
-  pairing_link: pau_first
+  child: pau
   token_digest: <%= Digest::SHA256.hexdigest("pau-ipad-device") %>
   last_seen_at: 2026-09-13 23:00:00
 
 pau_spare_ipad:
-  pairing_link: pau_second
+  child: pau
   token_digest: <%= Digest::SHA256.hexdigest("pau-spare-device") %>
 
 teo_ipad:
-  pairing_link: teo_only
+  child: teo
   token_digest: <%= Digest::SHA256.hexdigest("teo-ipad-device") %>

@@ -38,10 +38,7 @@ class PairingsController < ApplicationController
   end
 
   def set_pairing_link
-    link = PairingLink.find_by_token_for :invitation, params[:token]
-    return if link.nil? || link.revoked?
-
-    @pairing_link = link
-    @child = link.child
+    @pairing_link = PairingLink.find_by_token_for :invitation, params[:token]
+    @child = @pairing_link&.child
   end
 end

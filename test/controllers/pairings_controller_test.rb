@@ -81,20 +81,20 @@ class PairingsControllerTest < ActionDispatch::IntegrationTest
     end
   end
 
-  test "revoking the link still signs out the iPad that paired through it" do
+  test "the iPad keeps studying after the link that paired it is spent and another is issued" do
     travel_to Time.utc(2026, 9, 13, 23, 30)
     get pairing_path(token: @token)
     get "/"
 
     assert_select "[data-screen=study]"
 
-    @link.revoke!
+    @child.pairing_links.create!
 
     get "/"
 
     assert_response :success
-    assert_select "[data-screen=lost-identity]"
-    assert_select "[data-screen=study]", false
+    assert_select "[data-screen=study]"
+    assert_equal @child, Device.find_by_token(cookies[Authentication::COOKIE]).child
   end
 
   test "the manifest's start URL is the root, carrying no token, and stays inside the root scope" do
@@ -205,24 +205,12 @@ class PairingsControllerTest < ActionDispatch::IntegrationTest
     assert_includes style, "--child-dark: #{@child.color_hex_dark}"
   end
 
-  test "a revoked link pairs nothing, however fresh its token is" do
-    @link.revoke!
-
-    assert_no_difference -> { Device.count } do
-      get pairing_path(token: @token)
-    end
-
-    assert_response :not_found
-    assert_select "[data-screen=lost-identity]"
-    assert_empty cookies[Authentication::COOKIE].to_s
-  end
-
   test "opening an unknown token renders the same screen without leaking whether the token ever existed" do
     get pairing_path(token: FORGED_TOKEN)
 
     unknown_status, unknown_body = response.status, response.body
 
-    @link.revoke!
+    open_session.get pairing_path(token: @token)
     get pairing_path(token: @token)
 
     assert_equal unknown_status, response.status
@@ -230,9 +218,7 @@ class PairingsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "the lost-identity screen, which is the shared layout without the install view, links no manifest and no per-child icon" do
-    @link.revoke!
-
-    get pairing_path(token: @token)
+    get pairing_path(token: FORGED_TOKEN)
 
     assert_select "link[rel=manifest]", false
     assert_select "link[rel=apple-touch-icon]", false

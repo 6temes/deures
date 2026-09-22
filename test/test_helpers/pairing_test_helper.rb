@@ -1,6 +1,6 @@
 module PairingTestHelper
   def pair_device_as(child)
-    child.pairing_links.create!.devices.create!.tap do |device|
+    child.devices.create!.tap do |device|
       Current.device = device
       cookies[Authentication::COOKIE] = device.plain_token
     end

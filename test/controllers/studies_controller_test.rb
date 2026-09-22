@@ -138,8 +138,8 @@ class StudiesControllerTest < ActionDispatch::IntegrationTest
     assert_empty body_letters
   end
 
-  test "the root renders the lost-identity screen once the child's pairing link is revoked" do
-    pair_device_as(@child).pairing_link.revoke!
+  test "the root renders the lost-identity screen once the child's device is forgotten" do
+    pair_device_as(@child).forget!
 
     get "/"
 

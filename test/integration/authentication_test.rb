@@ -41,10 +41,10 @@ class AuthenticationTest < ActionDispatch::IntegrationTest
     assert_equal "child:Pau paired:true", response.body
   end
 
-  test "after the link is revoked, the same cookie resolves to no child (AE15)" do
+  test "after the device is forgotten, the same cookie resolves to no child (AE15)" do
     device = pair_device_as children(:pau)
 
-    device.pairing_link.revoke!
+    device.forget!
     get "/probe"
 
     assert_response :success
@@ -104,9 +104,9 @@ class AuthenticationTest < ActionDispatch::IntegrationTest
     end
   end
 
-  test "a revoked device is not given a fresh expiry" do
+  test "a forgotten device is not given a fresh expiry" do
     device = pair_device_as children(:pau)
-    device.pairing_link.revoke!
+    device.forget!
 
     get "/probe"
 
@@ -143,7 +143,8 @@ class AuthenticationTest < ActionDispatch::IntegrationTest
     get "/probe"
 
     assert_equal "child:Teo paired:true", response.body
-    assert_equal 1, link.devices.count
+    assert_equal 1, children(:teo).devices.where.not(id: devices(:teo_ipad)).count
+    assert_predicate link.reload, :claimed_at?
   end
 
   private
