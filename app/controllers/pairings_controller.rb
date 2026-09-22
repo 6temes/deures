@@ -37,8 +37,8 @@ class PairingsController < ApplicationController
       theme_color: @child.color_hex,
       background_color: @child.color_hex,
       icons: [
-        {src: pairing_icon_path(@token), sizes: "180x180", type: "image/png"},
-        {src: pairing_icon_512_path(@token), sizes: "512x512", type: "image/png", purpose: "any maskable"}
+        {src: pairing_icon_path(token: @token), sizes: "180x180", type: "image/png"},
+        {src: pairing_icon_512_path(token: @token), sizes: "512x512", type: "image/png", purpose: "any maskable"}
       ]
     }, content_type: MANIFEST_TYPE
   end
@@ -62,7 +62,7 @@ class PairingsController < ApplicationController
   end
 
   def launch_url
-    pairing_path @token, **LAUNCH
+    pairing_path token: @token, **LAUNCH
   end
 
   def lost_identity

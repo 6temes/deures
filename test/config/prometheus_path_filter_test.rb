@@ -8,6 +8,6 @@ class PrometheusPathFilterTest < ActiveSupport::TestCase
 
   test "counts an ordinary request" do
     assert_not PrometheusPathFilter.skip?("/")
-    assert_not PrometheusPathFilter.skip?("/p/sometoken")
+    assert_not PrometheusPathFilter.skip?("/p?token=sometoken")
   end
 end

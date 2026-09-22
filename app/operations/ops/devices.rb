@@ -51,7 +51,7 @@ module Ops
         child = child! @name
         before = child.pairing_links.count
         link = child.pairing_links.create!
-        url = "#{@origin}#{Rails.application.routes.url_helpers.pairing_path link.plain_token}"
+        url = "#{@origin}#{Rails.application.routes.url_helpers.pairing_path(token: link.plain_token)}"
 
         puts QrCode.render(url, caption: child.name, color: child.color_hex)
         "#{child.name}: pairing links #{before} → #{child.pairing_links.count}, #{url}"

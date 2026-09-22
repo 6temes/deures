@@ -28,11 +28,6 @@ module Deures
     # Common ones are `templates`, `generators`, or `middleware`, for example.
     config.autoload_lib(ignore: %w[assets tasks])
 
-    # Nor does anything here serve or receive a blob over HTTP, and this app is open to the
-    # internet with no gate in front of it, so the engine's upload and redirect routes would be
-    # a surface with no caller behind it.
-    config.active_storage.draw_routes = false
-
     # A request to an unrouted path under /p/ raises a routing error whose message quotes the
     # path, and a rescued response is logged as that message rather than through the filtered
     # path everything else reads. The pairing token is the whole credential, so the 404 goes:

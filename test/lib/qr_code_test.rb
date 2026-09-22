@@ -1,7 +1,7 @@
 require "test_helper"
 
 class QrCodeTest < ActiveSupport::TestCase
-  PAIRING_URL = "https://study.example.com/p/#{"a" * 43}"
+  PAIRING_URL = "https://study.example.com/p?token=#{"a" * 43}"
   PINK = "#e0409a"
   CELL = /\e\[[\d;]*m#{QrCode::HALF_BLOCK}/
 

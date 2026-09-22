@@ -46,12 +46,12 @@ class DevicesTest < ActiveSupport::TestCase
 
   test "issuing a pairing link prints it as a scannable code beside the URL it carries" do
     out, = capture_io { Ops::Devices::IssueLink.call child: "Pau" }
-    issued = out[%r{https://\S+/p/([A-Za-z0-9_-]+)}, 1]
+    issued = out[%r{https://\S+/p\?token=([A-Za-z0-9_-]+)}, 1]
 
     assert_equal 3, children(:pau).pairing_links.count
     assert_equal children(:pau), PairingLink.find_by_token(issued).child
     assert_includes out, QrCode::HALF_BLOCK
-    assert_equal QrCode.render("https://study.example.com/p/#{issued}", caption: "Pau", color: children(:pau).color_hex),
+    assert_equal QrCode.render("https://study.example.com/p?token=#{issued}", caption: "Pau", color: children(:pau).color_hex),
       out.lines[..-2].join.chomp
     assert_includes out, "#{QrCode::FRAME.fetch(:bottom_left)}#{QrCode::FRAME.fetch(:horizontal)} Pau "
   end
@@ -59,7 +59,7 @@ class DevicesTest < ActiveSupport::TestCase
   test "issuing a link against another origin prints that origin" do
     out, = capture_io { Ops::Devices::IssueLink.call child: "Teo", at: "http://192.168.1.44:3000" }
 
-    assert_includes out, "http://192.168.1.44:3000/p/"
+    assert_includes out, "http://192.168.1.44:3000/p?token="
   end
 
   test "revoking a link signs out its devices while another link's devices keep working" do

@@ -514,7 +514,7 @@ class StudyTest < ApplicationSystemTestCase
   end
 
   def open_study_screen(child)
-    visit "/p/#{child.pairing_links.create!.plain_token}"
+    visit "/p?token=#{child.pairing_links.create!.plain_token}"
     visit "/"
   end
 

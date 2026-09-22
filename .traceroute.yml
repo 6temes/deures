@@ -1,6 +1,12 @@
 ---
-# Active Storage ships its own engine and controllers. Its routes are not drawn — see
-# config/application.rb — but traceroute walks every loaded controller, so the engine's actions
-# look like an app that forgot to route them. They are not ours to route, to reach, or to delete.
+# Active Storage's routes are drawn now that libvips and image_processing generate variants.
+# traceroute checks two things against each other — every drawn route needs a matching action,
+# and every action needs a matching route — and filtering one side alone makes the engine's own
+# controllers look unmatched from the other: only one of the redirect/proxy pair is wired in per
+# blob/representation (config.active_storage.resolve_model_to_route decides which), so silencing
+# just the unreachable actions turns the routes that ARE wired into apparently-unused ones, and
+# vice versa. None of this is ours to route, to reach, or to delete.
 ignore_unreachable_actions:
+  - ^active_storage
+ignore_unused_routes:
   - ^active_storage

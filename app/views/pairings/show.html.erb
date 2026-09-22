@@ -1,6 +1,6 @@
 <% content_for :head do %>
-  <link rel="manifest" href="<%= pairing_manifest_path(@token) %>">
-  <link rel="apple-touch-icon" href="<%= pairing_icon_path(@token) %>">
+  <link rel="manifest" href="<%= pairing_manifest_path(token: @token) %>">
+  <link rel="apple-touch-icon" href="<%= pairing_icon_path(token: @token) %>">
 
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
@@ -22,7 +22,7 @@
   style="--child-light: <%= @child.color_hex %>; --child-dark: <%= @child.color_hex_dark %>"
   data-screen="install"
 >
-  <%= image_tag pairing_icon_path(@token), class: "install-icon", width: 180, height: 180, alt: @child.name %>
+  <%= image_tag pairing_icon_path(token: @token), class: "install-icon", width: 180, height: 180, alt: @child.name %>
 
   <p class="install-name"><%= @child.name %></p>
 </div>

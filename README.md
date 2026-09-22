@@ -119,7 +119,7 @@ There is no login form, so a fresh checkout has nothing to look at until a devic
 a link for one of the seeded children and open it:
 
 ```bash
-bin/rails runner 'puts "/p/" + Child.find_by!(name: "Pau").pairing_links.create!.plain_token'
+bin/rails runner 'puts "/p?token=" + Child.find_by!(name: "Pau").pairing_links.create!.plain_token'
 ```
 
 Visit that path, then visit `/`. You are now that child, with twelve cards due and nothing to tap

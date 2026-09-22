@@ -32,19 +32,19 @@ class InformantPairingTokenTest < ActionDispatch::IntegrationTest
   def app = RailsInformant::Middleware::ErrorCapture.new(Rails.application)
 
   test "the captured request url of a pairing request carries no token" do
-    capture_failure_on "/p/#{@token}"
+    capture_failure_on "/p?token=#{@token}"
 
-    assert_equal "http://www.example.com/p/[FILTERED]", occurrence.request_context["url"]
+    assert_equal "http://www.example.com/p?token=%5BFILTERED%5D", occurrence.request_context["url"]
   end
 
   test "the captured request url keeps the path under a pairing token" do
-    capture_failure_on "/p/#{@token}/icon-180.png"
+    capture_failure_on "/p/icon-180.png?token=#{@token}"
 
-    assert_equal "http://www.example.com/p/[FILTERED]/icon-180.png", occurrence.request_context["url"]
+    assert_equal "http://www.example.com/p/icon-180.png?token=%5BFILTERED%5D", occurrence.request_context["url"]
   end
 
   test "nothing informant persists carries the token" do
-    capture_failure_on "/p/#{@token}"
+    capture_failure_on "/p?token=#{@token}"
 
     assert_not_includes RailsInformant::ErrorGroup.all.map(&:attributes).to_s, @token
     assert_not_includes RailsInformant::Occurrence.all.map(&:attributes).to_s, @token
@@ -54,9 +54,9 @@ class InformantPairingTokenTest < ActionDispatch::IntegrationTest
     paths = []
     RailsInformant.config.before_record { paths << it.request_path }
 
-    capture_failure_on "/p/#{@token}"
+    capture_failure_on "/p?token=#{@token}"
 
-    assert_equal ["/p/[FILTERED]"], paths
+    assert_equal ["/p"], paths
   end
 
   private
