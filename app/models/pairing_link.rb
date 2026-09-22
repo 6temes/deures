@@ -2,19 +2,15 @@
 #
 # Table name: pairing_links
 #
-#  id           :integer          not null, primary key
-#  claimed_at   :datetime
-#  expires_at   :datetime         not null
-#  revoked_at   :datetime
-#  token_digest :string           not null
-#  created_at   :datetime         not null
-#  updated_at   :datetime         not null
-#  child_id     :integer          not null
+#  id         :integer          not null, primary key
+#  revoked_at :datetime
+#  created_at :datetime         not null
+#  updated_at :datetime         not null
+#  child_id   :integer          not null
 #
 # Indexes
 #
-#  index_pairing_links_on_child_id      (child_id)
-#  index_pairing_links_on_token_digest  (token_digest) UNIQUE
+#  index_pairing_links_on_child_id  (child_id)
 #
 # Foreign Keys
 #
@@ -29,49 +25,14 @@ class PairingLink < ApplicationRecord
 
   has_many :devices, dependent: :destroy
 
-  include Tokenized
-
-  scope :live, -> { where(claimed_at: nil, revoked_at: nil).where(expires_at: Time.current..) }
-
-  before_validation :open_window, on: :create
-
-  validates :expires_at, presence: true
-
-  def claim!
-    update! claimed_at: Time.current
+  # The block is what makes the link single-use. Its value is embedded when the token is minted —
+  # false, because no iPad has paired yet — and compared against a fresh reading of the record
+  # when the token is presented, so the first pairing stops every later presentation verifying.
+  generates_token_for :invitation, expires_in: WINDOW do
+    devices.any?
   end
 
-  def claimed?
-    claimed_at.present?
-  end
+  def revoke! = update!(revoked_at: Time.current)
 
-  def expired?
-    expires_at.past?
-  end
-
-  def pair!
-    transaction { devices.create!.tap { claim! } }
-  end
-
-  def revoke!
-    update! revoked_at: Time.current
-  end
-
-  def revoked?
-    revoked_at.present?
-  end
-
-  # The claiming device is still allowed through, because the install view it has just been
-  # rendered fetches the manifest and both icons with this same token straight after the claim.
-  def usable_by?(device)
-    return false if expired? || revoked?
-
-    !claimed? || device&.pairing_link_id == id
-  end
-
-  private
-
-  def open_window
-    self.expires_at ||= WINDOW.from_now
-  end
+  def revoked? = revoked_at.present?
 end

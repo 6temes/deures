@@ -9,8 +9,8 @@ class DevicesTest < ActiveSupport::TestCase
 
     assert_nil Device.find_by_token("pau-ipad-device")
     assert_nil Device.find_by_token("pau-spare-device")
-    assert_not PairingLink.find_by_token("pau-first-link").revoked?
-    assert_equal children(:pau), PairingLink.find_by_token("pau-first-link").devices.create!.child
+    assert_not_predicate pairing_links(:pau_first), :revoked?
+    assert_equal children(:pau), pairing_links(:pau_first).devices.create!.child
     assert_equal 1, out.lines.size
     assert_includes out, "2 → 0"
   end
@@ -46,12 +46,14 @@ class DevicesTest < ActiveSupport::TestCase
 
   test "issuing a pairing link prints it as a scannable code beside the URL it carries" do
     out, = capture_io { Ops::Devices::IssueLink.call child: "Pau" }
-    issued = out[%r{https://\S+/p\?token=([A-Za-z0-9_-]+)}, 1]
+    url = out[%r{https://\S+}]
+    issued = CGI.unescape url[/token=(.+)\z/, 1]
 
     assert_equal 3, children(:pau).pairing_links.count
-    assert_equal children(:pau), PairingLink.find_by_token(issued).child
+    assert_match %r{\Ahttps://study\.example\.com/p\?token=}, url
+    assert_equal children(:pau), PairingLink.find_by_token_for(:invitation, issued).child
     assert_includes out, QrCode::HALF_BLOCK
-    assert_equal QrCode.render("https://study.example.com/p?token=#{issued}", caption: "Pau", color: children(:pau).color_hex),
+    assert_equal QrCode.render(url, caption: "Pau", color: children(:pau).color_hex),
       out.lines[..-2].join.chomp
     assert_includes out, "#{QrCode::FRAME.fetch(:bottom_left)}#{QrCode::FRAME.fetch(:horizontal)} Pau "
   end
@@ -60,7 +62,6 @@ class DevicesTest < ActiveSupport::TestCase
     out, = capture_io { Ops::Devices::IssueLink.call child: "Pau" }
 
     assert_includes out, "expires 08:45"
-    assert_equal PairingLink::WINDOW.from_now, children(:pau).pairing_links.order(:id).last.expires_at
   end
 
   test "issuing a link against another origin prints that origin" do

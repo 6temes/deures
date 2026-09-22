@@ -20,8 +20,8 @@
 
     <%#
       The manifest link, the apple-touch-icon and the standalone meta tags belong to the install
-      view alone: only that request holds the plaintext token the manifest and the icon behind it
-      have to carry, and both answer for a child.
+      view alone: they are what Add to Home Screen reads, and the install view is the only screen
+      that is ever installed from.
     %>
     <%= yield :head %>
 

@@ -7,7 +7,7 @@ require "test_helper"
 class InformantPairingTokenTest < ActionDispatch::IntegrationTest
   setup do
     @link = children(:pau).pairing_links.create!
-    @token = @link.plain_token
+    @token = @link.generate_token_for(:invitation)
     # A configuration of its own, so that enabling capture and registering a callback below stay
     # inside this test.
     @config = RailsInformant.config
@@ -33,19 +33,19 @@ class InformantPairingTokenTest < ActionDispatch::IntegrationTest
   def app = RailsInformant::Middleware::ErrorCapture.new(Rails.application)
 
   test "the captured request url of a pairing request carries no token" do
-    capture_failure_on "/p?token=#{@token}"
+    capture_failure_on "/p?token=#{CGI.escape @token}"
 
     assert_equal "http://www.example.com/p?token=%5BFILTERED%5D", occurrence.request_context["url"]
   end
 
   test "the captured request url keeps the path under a pairing token" do
-    capture_failure_on "/p/icon-180.png?token=#{@token}"
+    capture_failure_on "/p/manifest.webmanifest?token=#{CGI.escape @token}"
 
-    assert_equal "http://www.example.com/p/icon-180.png?token=%5BFILTERED%5D", occurrence.request_context["url"]
+    assert_equal "http://www.example.com/p/manifest.webmanifest?token=%5BFILTERED%5D", occurrence.request_context["url"]
   end
 
   test "nothing informant persists carries the token" do
-    capture_failure_on "/p?token=#{@token}"
+    capture_failure_on "/p?token=#{CGI.escape @token}"
 
     assert_not_includes RailsInformant::ErrorGroup.all.map(&:attributes).to_s, @token
     assert_not_includes RailsInformant::Occurrence.all.map(&:attributes).to_s, @token
@@ -55,15 +55,17 @@ class InformantPairingTokenTest < ActionDispatch::IntegrationTest
     paths = []
     RailsInformant.config.before_record { paths << it.request_path }
 
-    capture_failure_on "/p?token=#{@token}"
+    capture_failure_on "/p?token=#{CGI.escape @token}"
 
     assert_equal ["/p"], paths
   end
 
   private
 
+  # Resolving the device cookie is the one thing every pairing path does, whatever it answers
+  # with, so failing there reaches each of them from the same stub.
   def capture_failure_on(path)
-    PairingLink.stub :find_by_token, ->(_) { raise "the card deck caught fire" } do
+    Device.stub :find_by_token, ->(_) { raise "the card deck caught fire" } do
       assert_raises(RuntimeError) { get path }
     end
   end

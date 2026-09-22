@@ -1,52 +1,34 @@
 class PairingsController < ApplicationController
-  # One checked-in icon per color in Child::COLORS, read once at boot: nothing then builds a
-  # file path out of a column an agent operation can write.
-  ICONS = Child::COLORS.keys.index_with { Rails.root.join("app/assets/images/icons/#{it}-180.png").binread }.freeze
-  ICONS_512 = Child::COLORS.keys.index_with { Rails.root.join("app/assets/images/icons/#{it}-512.png").binread }.freeze
   MANIFEST_TYPE = "application/manifest+json"
 
-  # The device cookie is resolved here as on any other request, rather than skipped with
-  # allow_unauthenticated_access: the link is claimed by the iPad that pairs through it, and the
-  # cookie is what says the manifest and icon requests that follow come from that same iPad.
   before_action :no_store
-  before_action :set_pairing_link
+  before_action :set_pairing_link, only: :show
 
   def show
     return lost_identity unless @pairing_link
 
-    pair_device
+    start_pairing_for @pairing_link
   end
 
   # Built here rather than in a template: a manifest is a JSON body, and an ERB view would only
   # be a way of asking for it to be escaped as HTML and then unescaped again with `raw`.
   def manifest
-    return head :not_found unless @pairing_link
+    child = Current.child
+    return head :not_found unless child
 
     render json: {
-      name: @child.name,
-      short_name: @child.name,
+      name: child.name,
+      short_name: child.name,
       start_url: root_path,
       scope: "/",
       display: "standalone",
-      theme_color: @child.color_hex,
-      background_color: @child.color_hex,
+      theme_color: child.color_hex,
+      background_color: child.color_hex,
       icons: [
-        {src: pairing_icon_path(token: @token), sizes: "180x180", type: "image/png"},
-        {src: pairing_icon_512_path(token: @token), sizes: "512x512", type: "image/png", purpose: "any maskable"}
+        {src: helpers.asset_path("icons/#{child.color}-180.png"), sizes: "180x180", type: "image/png"},
+        {src: helpers.asset_path("icons/#{child.color}-512.png"), sizes: "512x512", type: "image/png", purpose: "any maskable"}
       ]
     }, content_type: MANIFEST_TYPE
-  end
-
-  def icon
-    return head :not_found unless @pairing_link
-
-    send_data ICONS.fetch(@child.color), type: "image/png", disposition: "inline"
-  end
-
-  def icon_512
-    return head :not_found unless @pairing_link
-
-    send_data ICONS_512.fetch(@child.color), type: "image/png", disposition: "inline"
   end
 
   private
@@ -55,18 +37,11 @@ class PairingsController < ApplicationController
     render "shared/lost_identity", status: :not_found
   end
 
-  def pair_device
-    return if Current.device&.pairing_link_id == @pairing_link.id
-
-    start_pairing_for @pairing_link
-  end
-
   def set_pairing_link
-    link = PairingLink.find_by_token params[:token]
-    return unless link&.usable_by?(Current.device)
+    link = PairingLink.find_by_token_for :invitation, params[:token]
+    return if link.nil? || link.revoked?
 
     @pairing_link = link
     @child = link.child
-    @token = params[:token]
   end
 end

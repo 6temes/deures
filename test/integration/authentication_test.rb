@@ -19,7 +19,7 @@ class AuthenticationTest < ActionDispatch::IntegrationTest
     allow_unauthenticated_access
 
     def show
-      start_pairing_for PairingLink.find_by_token(params[:token])
+      start_pairing_for PairingLink.find_by_token_for(:invitation, params[:token])
       render plain: "child:#{Current.child&.name} paired:#{paired?}"
     end
   end
@@ -135,7 +135,7 @@ class AuthenticationTest < ActionDispatch::IntegrationTest
   test "pairing writes the cookie the next request resolves from" do
     link = children(:teo).pairing_links.create!
 
-    get "/pair/#{link.plain_token}"
+    get "/pair/#{CGI.escape link.generate_token_for(:invitation)}"
 
     assert_response :success
     assert_equal "child:Teo paired:true", response.body

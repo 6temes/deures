@@ -11,10 +11,8 @@ Rails.application.routes.draw do
 
   get "p" => "pairings#show", :as => :pairing
 
-  # Each of these three paths is a literal filename, not a token, but Rails still appends an
-  # optional (.:format) after it unless format is turned off — so "icon-180.png.json" would
-  # otherwise also route, rendered as JSON, when it should 404 like any other unrecognized path.
+  # The path is a literal filename, not a token, but Rails still appends an optional (.:format)
+  # after it unless format is turned off — so "manifest.webmanifest.json" would otherwise also
+  # route, rendered as JSON, when it should 404 like any other unrecognized path.
   get "p/manifest.webmanifest" => "pairings#manifest", :as => :pairing_manifest, :format => false
-  get "p/icon-180.png" => "pairings#icon", :as => :pairing_icon, :format => false
-  get "p/icon-512.png" => "pairings#icon_512", :as => :pairing_icon_512, :format => false
 end

@@ -20,14 +20,10 @@ module Ops
         devices.each(&:forget!)
 
         "#{child.name}: devices signed in #{devices.size} → #{signed_in(child).size}, " \
-          "#{live_links child} pairing links still live"
+          "issue a link for each iPad that is to sign in again"
       end
 
       private
-
-      def live_links(child)
-        child.pairing_links.live.count
-      end
 
       def signed_in(child)
         Device.where(forgotten_at: nil, pairing_link: child.pairing_links.where(revoked_at: nil)).to_a
@@ -51,11 +47,12 @@ module Ops
         child = child! @name
         before = child.pairing_links.count
         link = child.pairing_links.create!
-        url = "#{@origin}#{Rails.application.routes.url_helpers.pairing_path(token: link.plain_token)}"
+        token = link.generate_token_for(:invitation)
+        url = "#{@origin}#{Rails.application.routes.url_helpers.pairing_path(token:)}"
 
         puts QrCode.render(url, caption: child.name, color: child.color_hex)
         "#{child.name}: pairing links #{before} → #{child.pairing_links.count}, " \
-          "expires #{link.expires_at.strftime("%H:%M")} and pairs one iPad, #{url}"
+          "expires #{PairingLink::WINDOW.from_now.strftime("%H:%M")} and pairs one iPad, #{url}"
       end
     end
 
