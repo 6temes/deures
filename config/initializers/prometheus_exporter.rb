@@ -1,3 +1,12 @@
+# The health check and the assets would otherwise dominate the throughput count and flatten the
+# response-time histogram the alerts read. The decision sits outside the guard below so that it
+# is exercised by the suite, which never has a collector.
+module PrometheusPathFilter
+  SKIP_PATHS = %w[/up /assets].freeze
+
+  def self.skip?(path) = SKIP_PATHS.any? { path.start_with? it }
+end
+
 # The collector runs as a Kamal accessory rather than in this process, so that a deploy can
 # start the new container without the old one still holding the metrics port.
 if ENV["PROMETHEUS_COLLECTOR_HOST"].present? && !Rails.env.test?
@@ -10,13 +19,9 @@ if ENV["PROMETHEUS_COLLECTOR_HOST"].present? && !Rails.env.test?
     port: 9394
   )
 
-  # The health check and the assets would otherwise dominate the throughput count and flatten
-  # the response-time histogram the alerts read.
   class FilteredPrometheusMiddleware < PrometheusExporter::Middleware
-    SKIP_PATHS = %w[/up /assets].freeze
-
     def call(env)
-      if SKIP_PATHS.any? { env["PATH_INFO"].start_with? it }
+      if PrometheusPathFilter.skip? env["PATH_INFO"]
         @app.call env
       else
         super
