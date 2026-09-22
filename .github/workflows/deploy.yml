@@ -50,9 +50,13 @@ jobs:
       # ":9397:9394", which binds 0.0.0.0, and Docker's published ports are DNAT'd past the host
       # firewall. So this runs before anything is checked out or any connection is made.
       - name: Preflight required secrets
+        # The deploy key is read here rather than in the job's environment, so that only this step
+        # and the ssh-agent step below can see it.
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
         run: |
           missing=0
-          for var in AKAMAI_HOST_KEY APP_HOST DEPLOY_HOST DEPLOY_SSH_PORT LITESTREAM_KNOWN_HOSTS_HOST_PATH LITESTREAM_REPLICA_ROOT LITESTREAM_SFTP_HOST LITESTREAM_SFTP_USER LITESTREAM_SSH_KEY_HOST_PATH METRICS_BIND_IP RAILS_MASTER_KEY WG_MAINFRAME_IP; do
+          for var in AKAMAI_HOST_KEY APP_HOST DEPLOY_HOST DEPLOY_SSH_PORT LITESTREAM_KNOWN_HOSTS_HOST_PATH LITESTREAM_REPLICA_ROOT LITESTREAM_SFTP_HOST LITESTREAM_SFTP_USER LITESTREAM_SSH_KEY_HOST_PATH METRICS_BIND_IP RAILS_MASTER_KEY SSH_PRIVATE_KEY WG_MAINFRAME_IP; do
             if [ -z "${!var}" ]; then
               echo "::error::Required secret/var $var is empty"
               missing=1
