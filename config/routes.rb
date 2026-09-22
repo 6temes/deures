@@ -1,4 +1,6 @@
 Rails.application.routes.draw do
+  mount RailsInformant::Engine => "/informant"
+
   root "studies#show"
 
   post "answers" => "answers#create"

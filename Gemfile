@@ -46,6 +46,11 @@ gem "kamal", require: false
 # Prometheus metrics, reported to a collector running as a separate Kamal accessory
 gem "prometheus_exporter"
 
+# Error monitoring kept in this app's own database, read through its MCP server. Nobody is
+# watching when a child's iPad hits a 500, so the app has to keep the record itself
+# [https://github.com/6temes/rails-informant]
+gem "rails-informant"
+
 # Structured JSON logging to stdout, so a log line arrives at the collector as fields
 # rather than as a line to be re-parsed [https://github.com/reidmorrison/rails_semantic_logger]
 gem "rails_semantic_logger"
