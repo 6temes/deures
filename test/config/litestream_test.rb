@@ -31,4 +31,15 @@ class LitestreamTest < ActiveSupport::TestCase
         "#{path} is a path this published repository should be taking from the environment"
     end
   end
+  # Litestream reads no known_hosts file: without a pinned key it calls ssh.InsecureIgnoreHostKey
+  # and replicates the children's history to whatever answers on the backup host's address.
+  test "verifies the backup host against a pinned key" do
+    replicas = CONFIG.scan(/^      - type: sftp$.*?(?=^  - path:|\z)/m)
+
+    assert_equal 2, replicas.count
+    replicas.each do |replica|
+      assert_match(/host-key: \$\{LITESTREAM_SFTP_HOST_KEY\}/, replica,
+        "an sftp replica takes whatever host answers")
+    end
+  end
 end

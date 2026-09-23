@@ -1,9 +1,13 @@
 # Prometheus metrics endpoint, scraped over the private network.
 addr: ":9093"
 
-# The backup host, its login and the directory it writes to are configuration, not documentation,
-# and this repository is published — so they arrive from the container's environment and the only
-# paths written here are the container's own.
+# The backup host, its login, the directory it writes to and the key it is identified by are
+# configuration, not documentation, and this repository is published — so they arrive from the
+# container's environment and the only paths written here are the container's own.
+#
+# Without host-key the client calls ssh.InsecureIgnoreHostKey and takes whatever answers; it reads
+# no known_hosts file of its own, so pinning it here is the only thing that verifies the replica
+# host at all.
 host: ${LITESTREAM_SFTP_HOST}
 user: ${LITESTREAM_SFTP_USER}
 key-path: /etc/litestream/sftp_key
@@ -24,8 +28,10 @@ dbs:
     replicas:
       - type: sftp
         path: ${LITESTREAM_REPLICA_ROOT}/production.sqlite3
+        host-key: ${LITESTREAM_SFTP_HOST_KEY}
 
   - path: /rails/storage/production_queue.sqlite3
     replicas:
       - type: sftp
         path: ${LITESTREAM_REPLICA_ROOT}/production_queue.sqlite3
+        host-key: ${LITESTREAM_SFTP_HOST_KEY}
