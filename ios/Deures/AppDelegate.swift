@@ -9,6 +9,9 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     if Probe.isRequested { return true }
     #endif
     Shell.dayDone = Shell.daySync
+    // Scenes read this when they connect, so it has to be in place first.
+    Shell.repairingPrompt = Shell.parentScreens
+    Shell.followAuthorization()
     Hotwire.registerBridgeComponents([DayComponent.self])
     Hotwire.registerRouteDecisionHandlers(Shell.routeDecisionHandlers)
     Hotwire.config.defaultNavigationController = { NavigationController() }

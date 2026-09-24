@@ -2,7 +2,7 @@
 import SwiftUI
 
 // Child-facing, so nothing to read: the same grown-up figure the web shows when an iPad has lost
-// its pairing, and otherwise a single button to try again.
+// its pairing, and otherwise a single button to try again. The lock in the corner is the parent's.
 struct ShellErrorView: @preconcurrency ErrorPresentableView {
   let error: HotwireNativeError
   let handler: ErrorPresenter.Handler?
@@ -29,13 +29,24 @@ struct ShellErrorView: @preconcurrency ErrorPresentableView {
         .accessibilityLabel("Try again")
       }
     }
+    .overlay(alignment: .topTrailing) {
+      Button {
+        Shell.parentScreens.openParentAccess()
+      } label: {
+        Image(systemName: "lock.fill")
+          .font(.system(size: 18))
+          .foregroundStyle(Color(Self.muted).opacity(0.6))
+          .frame(width: 56, height: 56)
+      }
+      .accessibilityLabel("Parent")
+    }
   }
 
-  private static let ground = UIColor { $0.userInterfaceStyle == .dark ? UIColor(rgb: 0x201e1c) : UIColor(rgb: 0xe4e1db) }
-  private static let muted = UIColor { $0.userInterfaceStyle == .dark ? UIColor(rgb: 0xa39c92) : UIColor(rgb: 0x6f6a62) }
+  static let ground = UIColor { $0.userInterfaceStyle == .dark ? UIColor(rgb: 0x201e1c) : UIColor(rgb: 0xe4e1db) }
+  static let muted = UIColor { $0.userInterfaceStyle == .dark ? UIColor(rgb: 0xa39c92) : UIColor(rgb: 0x6f6a62) }
 }
 
-private struct GrownUp: Shape {
+struct GrownUp: Shape {
   func path(in rect: CGRect) -> Path {
     let unit = min(rect.width, rect.height) / 64
     func point(_ x: CGFloat, _ y: CGFloat) -> CGPoint { CGPoint(x: rect.minX + x * unit, y: rect.minY + y * unit) }

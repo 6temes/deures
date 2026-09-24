@@ -8,6 +8,7 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
   var window: UIWindow?
 
   private var pairingLinkRouted = false
+  private var parentWindow: ParentWindow?
   private lazy var navigator = Navigator(configuration: Navigator.Configuration(name: "main", startLocation: Shell.startLocation), delegate: self)
   private lazy var links = IncomingLinks(
     startLocation: Shell.startLocation,
@@ -32,6 +33,7 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     #endif
     window.rootViewController = navigator.rootViewController
     window.makeKeyAndVisible()
+    parentWindow = ParentWindow(scene: windowScene, main: window, screens: Shell.parentScreens)
 
     if let url = connectionOptions.userActivities.lazy.compactMap(Self.webpageURL).first {
       Task {
@@ -48,6 +50,7 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     #if DEBUG
     if Probe.isRequested { return }
     #endif
+    Task { await Shell.parentScreens.refresh() }
     Task { await Shell.daySync.sync() }
   }
 
