@@ -18,14 +18,20 @@ extension Shell {
   private static let log = Logger(subsystem: "Deures", category: "gate")
   private static var tokenExpiry: NotificationCenter.ObservationToken?
 
-  static func startGate() {
-    HTTPCookieStorage.shared.deleteDeviceCookies(for: startLocation.host()!)
-
+  // Monitoring is refused until Screen Time is approved, which on a first run happens after launch,
+  // so every foreground asks again; an already-registered schedule makes this a no-op.
+  static func startSchedule() {
     do {
       try GateSchedule.start()
     } catch {
       log.error("Daily schedule not started: \(error)")
     }
+  }
+
+  static func startGate() {
+    HTTPCookieStorage.shared.deleteDeviceCookies(for: startLocation.host()!)
+
+    startSchedule()
 
     if #available(iOS 26.5, *) {
       tokenExpiry = NotificationCenter.default.addObserver(of: ManagedSettingsStore.self, for: .tokensDidExpire) { _ in

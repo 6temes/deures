@@ -50,7 +50,10 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     #if DEBUG
     if Probe.isRequested { return }
     #endif
-    Task { await Shell.parentScreens.refresh() }
+    Task {
+      await Shell.parentScreens.refresh()
+      Shell.startSchedule()
+    }
     Task { await Shell.daySync.sync() }
   }
 
