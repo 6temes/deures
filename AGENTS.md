@@ -20,6 +20,8 @@ refuses a commit that carries:
 - an environment file, which on the server holds the master key and the backup host's login
 - a database, a log, anything under `tmp/`, and anything under `.claude/`
 - a private key block, a cloud or service token, or credentials inside a URL
+- the iOS app's `ios/Config/Local.xcconfig`, or a Team ID in a `project.pbxproj` or `.xcconfig`,
+  which Xcode's Signing screen writes there unasked
 
 If it refuses something, take the file out of the commit rather than out of the working tree:
 `git restore --staged <path>`. Adding a rule exception means editing `bin/secrets_guard` and saying

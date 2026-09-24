@@ -45,3 +45,6 @@
 # Ignore Docker-related files
 /.dockerignore
 /Dockerfile*
+
+# The iOS app is built on a Mac, never in the server image.
+/ios/

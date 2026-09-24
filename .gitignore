@@ -71,3 +71,13 @@
 # link printed there signs an iPad in as a child with no further check.
 .byebug_history
 .irb_history
+
+# The iOS app's household values: Team ID, bundle prefix and host. Base.xcconfig includes this
+# file, and Local.example.xcconfig is the committed template for it.
+/ios/Config/Local.xcconfig
+
+# Xcode and SwiftPM output, and one person's Xcode window state.
+xcuserdata/
+*.xcuserstate
+DerivedData/
+.build/
