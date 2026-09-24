@@ -423,7 +423,7 @@ struct ParentScreensTests {
 
     center.grants = .approved
     await screens.refresh()
-    #expect(screens.overlay == nil)
+    guard case .setup = screens.overlay else { Issue.record("expected the grant to open setup"); return }
   }
 
   @Test func aGrantMadeDuringThisRunIsFresh() async {
@@ -444,6 +444,51 @@ struct ParentScreensTests {
 
     guard case let .setup(setup) = screens.overlay else { Issue.record("expected setup"); return }
     #expect(setup.step == .choosePIN)
+  }
+
+  // The forgotten-PIN recovery: the parent turns Deures's Screen Time access off in Settings, behind
+  // the Screen Time passcode, and back on.
+  @Test func turningScreenTimeOffAndOnAgainReopensSetupForANewPIN() async throws {
+    let fixture = try ParentFixture(snapshot: pendingInTokyo).withPIN()
+    let center = FakeCenter(.approved)
+    let screens = screens(fixture, center: center)
+    await screens.refresh()
+    #expect(screens.overlay == nil)
+
+    center.status = .denied
+    screens.authorization.observe(.denied)
+    await screens.refresh()
+    guard case .askGrownUp = screens.overlay else { Issue.record("expected ask a grown-up"); return }
+
+    center.status = .approved
+    screens.authorization.observe(.approved)
+    await screens.refresh()
+
+    guard case let .setup(setup) = screens.overlay else { Issue.record("expected setup"); return }
+    #expect(setup.step == .choosePIN)
+    #expect(setup.allowlist == pendingInTokyo.allowlist)
+    setup.enterNewPIN("222222")
+    setup.enterNewPIN("222222")
+    setup.save(fixture.choice())
+    setup.finish()
+
+    #expect(screens.overlay == nil)
+    #expect(try fixture.pins.verify(pin("222222")) == .accepted)
+    #expect(try fixture.pins.verify(pin("482913")) == .rejected)
+
+    await screens.refresh()
+    #expect(screens.overlay == nil)
+  }
+
+  @Test func screenTimeAlreadyApprovedAtLaunchLeavesACompletedSetupAlone() async throws {
+    let fixture = try ParentFixture(snapshot: pendingInTokyo).withPIN()
+    let screens = screens(fixture, center: FakeCenter(.approved))
+
+    await screens.refresh()
+    await screens.refresh()
+
+    #expect(screens.overlay == nil)
+    #expect(try fixture.pins.verify(pin("482913")) == .accepted)
   }
 
   @Test func parentAccessOpensAtThePINPrompt() async throws {

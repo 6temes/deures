@@ -63,7 +63,7 @@ struct SetupView: View {
         case .currentPIN:
           PINPromptView(prompt: flow.currentPIN, title: "Enter the parent PIN", submit: flow.enterCurrentPIN)
         case .allowlist:
-          AllowlistEditor(initial: nil, save: flow.save)
+          AllowlistEditor(initial: flow.allowlist, save: flow.save)
         case .scanPairingCode:
           ScanPairingCodeView(failed: flow.failed, done: flow.finish)
         }

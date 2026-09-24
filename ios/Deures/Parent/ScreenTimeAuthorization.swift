@@ -33,6 +33,10 @@ final class ScreenTimeAuthorization {
     self.status = status
   }
 
+  func spendFresh() {
+    unapproved = nil
+  }
+
   func request() async {
     await requestChild()
     observe(current())

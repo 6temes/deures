@@ -56,12 +56,18 @@ final class ParentScreens: RepairingPrompt {
     }
   }
 
+  // A grant made during this run reopens setup even after it has completed: turning Screen Time off
+  // and on again, behind the Screen Time passcode, is how a parent replaces a forgotten PIN. The
+  // grant is spent when that setup finishes, so it does not reopen on every return to the app.
   func refresh() async {
     await authorization.request()
-    guard authorization.status == .approved, setup == nil, flag.read() == .absent else { return }
+    guard authorization.status == .approved, setup == nil else { return }
+    let fresh = authorization.fresh
+    guard fresh != nil || flag.read() == .absent else { return }
 
     access = nil
-    setup = SetupFlow(pins: pins, evaluator: evaluator, flag: flag, authorization: authorization.fresh, clock: clock) { [weak self] in
+    setup = SetupFlow(pins: pins, evaluator: evaluator, flag: flag, authorization: fresh, clock: clock) { [weak self] in
+      self?.authorization.spendFresh()
       self?.setup = nil
     }
   }

@@ -53,6 +53,12 @@ final class SetupFlow {
     step = (try? pins.isSet) == true && authorization == nil ? .currentPIN : .choosePIN
   }
 
+  // Offered as the starting selection, so replacing a forgotten PIN does not also mean picking
+  // every allowed app again.
+  var allowlist: Data? {
+    evaluator.store.load()?.allowlist
+  }
+
   func enterNewPIN(_ digits: String) {
     guard step == .choosePIN, let pin = newPIN.enter(digits) else { return }
 
