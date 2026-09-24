@@ -11,12 +11,25 @@ struct DeviceCookiePairing: DeviceCookieSource, PairingStatus {
   let host: String
 
   func deviceCookie() async -> HTTPCookie? {
-    let cookies = await WKWebsiteDataStore.default().httpCookieStore.allCookies()
-    return cookies.first { $0.name == "device_token" && $0.domain.trimmingPrefix(".").lowercased() == host.lowercased() }
+    await WKWebsiteDataStore.default().httpCookieStore.allCookies().first { $0.isDeviceCookie(for: host) }
   }
 
   func isPaired() async -> Bool {
     await deviceCookie() != nil
+  }
+}
+
+extension HTTPCookie {
+  func isDeviceCookie(for host: String) -> Bool {
+    name == "device_token" && domain.trimmingPrefix(".").lowercased() == host.lowercased()
+  }
+}
+
+// Hotwire copies every web-view cookie into the shared storage after each request, which would
+// leave a second copy of the device credential on disk.
+extension HTTPCookieStorage {
+  func deleteDeviceCookies(for host: String) {
+    cookies?.filter { $0.isDeviceCookie(for: host) }.forEach(deleteCookie)
   }
 }
 

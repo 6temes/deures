@@ -153,3 +153,34 @@ struct JournalShield: ShieldWriter {
     }
   }
 }
+
+struct FollowingDayTests {
+  let tokyo = TimeZone(identifier: "Asia/Tokyo")!
+  let allowlist = Data("allowlist-tokens".utf8)
+  let mondayEvening = ISO8601DateFormatter().date(from: "2026-09-14T14:59:00Z")!
+
+  func evaluator(_ snapshot: Snapshot, deviceZone: TimeZone) -> GateEvaluator {
+    let journal = Journal()
+    return GateEvaluator(store: JournalStore(journal: journal, snapshot: snapshot), setup: JournalSetup(journal: journal), shield: JournalShield(journal: journal), deviceZone: { deviceZone })
+  }
+
+  @Test func aPINUnlockedDayIsShieldedAgainForTheNextDate() {
+    let snapshot = Snapshot(allowlist: allowlist, childID: 1, pinUnlock: CalendarDay("2026-09-14")!, zoneIdentifier: "Asia/Tokyo")
+
+    #expect(evaluator(snapshot, deviceZone: tokyo).evaluate(now: mondayEvening) == .clear)
+    #expect(evaluator(snapshot, deviceZone: tokyo).evaluateFollowingDay(after: mondayEvening) == .apply(exceptions: allowlist))
+  }
+
+  @Test func aFreeNextDateStaysClear() {
+    let snapshot = Snapshot(allowlist: allowlist, childID: 1, freeDates: [CalendarDay("2026-09-15")!], zoneIdentifier: "Asia/Tokyo")
+
+    #expect(evaluator(snapshot, deviceZone: tokyo).evaluateFollowingDay(after: mondayEvening) == .clear)
+  }
+
+  @Test func theNextDateIsTheHouseholdsNotTheDevicesZone() {
+    let tuesdayJustAfterMidnightInTokyo = ISO8601DateFormatter().date(from: "2026-09-14T15:30:00Z")!
+    let snapshot = Snapshot(allowlist: allowlist, childID: 1, freeDates: [CalendarDay("2026-09-16")!], zoneIdentifier: "Asia/Tokyo")
+
+    #expect(evaluator(snapshot, deviceZone: .gmt).evaluateFollowingDay(after: tuesdayJustAfterMidnightInTokyo) == .clear)
+  }
+}

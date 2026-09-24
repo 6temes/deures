@@ -51,6 +51,7 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 // The pairing link sets the device cookie, so the day can only be read once its visit has finished.
 extension SceneDelegate: @preconcurrency NavigatorDelegate {
   func requestDidFinish(at url: URL) {
+    HTTPCookieStorage.shared.deleteDeviceCookies(for: Shell.startLocation.host()!)
     guard pairingLinkRouted else { return }
     pairingLinkRouted = false
     Task { await Shell.daySync.sync() }

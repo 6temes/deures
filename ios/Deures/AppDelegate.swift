@@ -15,6 +15,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     #if DEBUG
     Hotwire.config.debugLoggingEnabled = true
     #endif
+    Shell.startGate()
     return true
   }
 }

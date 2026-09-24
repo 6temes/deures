@@ -37,3 +37,14 @@ public struct GateEvaluator {
     return decision
   }
 }
+
+extension GateEvaluator {
+  // The monitor's interval ends at 23:59, and the shield it writes then has to be right for the day
+  // about to start. The next date is counted in the household's zone, as the gate counts today.
+  @discardableResult
+  public func evaluateFollowingDay(after now: Date) -> GateDecision {
+    var calendar = Calendar(identifier: .gregorian)
+    calendar.timeZone = store.load()?.zone ?? deviceZone()
+    return evaluate(now: calendar.date(byAdding: .day, value: 1, to: calendar.startOfDay(for: now))!)
+  }
+}

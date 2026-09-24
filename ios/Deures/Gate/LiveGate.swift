@@ -1,27 +1,47 @@
 import Foundation
 import GateKit
+import ManagedSettings
+import os
 
 extension Shell {
+  nonisolated static let appGroup = Bundle.main.object(forInfoDictionaryKey: "AppGroup") as! String
+
+  static let evaluator = GateEvaluator(
+    store: DefaultsSnapshotStore(suiteName: appGroup),
+    setup: KeychainSetupFlag(accessGroup: appGroup),
+    shield: ManagedSettingsShield()
+  )
+
   static let daySync = DaySync(
     startLocation: startLocation,
     cookies: DeviceCookiePairing(host: startLocation.host()!),
     session: URLSession(configuration: DaySync.sessionConfiguration()),
-    evaluator: GateEvaluator(
-      store: DefaultsSnapshotStore(suiteName: Bundle.main.object(forInfoDictionaryKey: "AppGroup") as! String),
-      setup: SetupNotYetRead(),
-      shield: ShieldNotYetWritten()
-    )
+    evaluator: evaluator
   )
-}
 
-// Stand-ins until the ManagedSettings adapter and the Keychain setup flag exist. With setup absent
-// the gate leaves the shield untouched, so nothing here can block or unblock the iPad.
-struct SetupNotYetRead: SetupFlagReader {
-  func read() -> SetupFlag {
-    .absent
+  private static let log = Logger(subsystem: "Deures", category: "gate")
+  private static var tokenExpiry: NotificationCenter.ObservationToken?
+
+  static func startGate() {
+    HTTPCookieStorage.shared.deleteDeviceCookies(for: startLocation.host()!)
+
+    do {
+      try GateSchedule.start()
+    } catch {
+      log.error("Daily schedule not started: \(error)")
+    }
+
+    if #available(iOS 26.5, *) {
+      tokenExpiry = NotificationCenter.default.addObserver(of: ManagedSettingsStore.self, for: .tokensDidExpire) { _ in
+        await MainActor.run { refreshAllowlist() }
+      }
+    }
   }
-}
 
-struct ShieldNotYetWritten: ShieldWriter {
-  func apply(_ decision: GateDecision) {}
+  @available(iOS 26.5, *)
+  private static func refreshAllowlist() {
+    evaluator.evaluate(now: Date()) { snapshot in
+      if let refreshed = snapshot.allowlist.flatMap(Allowlist.refreshed) { snapshot.allowlist = refreshed }
+    }
+  }
 }
