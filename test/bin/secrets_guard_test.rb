@@ -66,6 +66,12 @@ class SecretsGuardTest < ActiveSupport::TestCase
     assert_includes refused, "Team ID"
   end
 
+  test "refuses a Team ID written under the target attributes of the Xcode project" do
+    refused = stage("ios/Deures.xcodeproj/project.pbxproj" => "\t\t\t\t\t\tDevelopmentTeam = ABCDE12345;\n")
+    assert_includes refused, "project.pbxproj:1"
+    assert_includes refused, "Team ID"
+  end
+
   test "refuses a Team ID in an xcconfig, quoted or not" do
     assert_includes stage("ios/Config/Base.xcconfig" => "DEVELOPMENT_TEAM = ABCDE12345\n"), "Team ID"
     assert_includes stage("ios/Config/Base.xcconfig" => %(DEVELOPMENT_TEAM = "ABCDE12345";\n)), "Team ID"
