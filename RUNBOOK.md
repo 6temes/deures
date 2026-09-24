@@ -127,7 +127,9 @@ the team from that file, so there is nothing to set on Xcode's Signing screen.
 
 The server has to be serving the association file before the first pairing: set `APPLE_APP_ID`
 in the deployment, as the [README](README.md#running-it-for-real) says, to the Team ID, a dot,
-and `<BUNDLE_ID_PREFIX>.deures`. Without it the pairing code opens Safari.
+and `<BUNDLE_ID_PREFIX>.deures`. Without it the pairing code opens Safari. The deploy workflow does
+not carry it yet: add it as a repository secret, to the deploy job's `env`, and to the list its
+preflight step checks, all three together.
 
 ### Installing
 
