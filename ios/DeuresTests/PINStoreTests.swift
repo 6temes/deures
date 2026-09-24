@@ -15,14 +15,6 @@ final class InMemoryKeychain: Keychain {
   }
 }
 
-final class TestClock {
-  var now = Date(timeIntervalSince1970: 1_789_000_000)
-
-  func advance(_ seconds: TimeInterval) {
-    now += seconds
-  }
-}
-
 func pin(_ digits: String) throws -> PIN {
   try #require(PIN(digits))
 }
@@ -33,7 +25,7 @@ func freshAuthorization() throws -> FreshAuthorization {
 
 struct PINStoreTests {
   let keychain = InMemoryKeychain()
-  let clock = TestClock()
+  let clock = TestClock(Date(timeIntervalSince1970: 1_789_000_000))
 
   func makeStore() -> PINStore {
     PINStore(keychain: keychain, now: { [clock] in clock.now })
@@ -89,15 +81,15 @@ struct PINStoreTests {
     #expect(try store.lockoutRemaining == 60)
     #expect(try store.verify(pin("482913")) == .locked(remaining: 60))
 
-    clock.advance(59)
+    clock.advance(by: 59)
     #expect(try store.verify(pin("482913")) == .locked(remaining: 1))
 
-    clock.advance(1)
+    clock.advance(by: 1)
     #expect(try store.lockoutRemaining == nil)
     try failFiveTimes(store)
     #expect(try store.lockoutRemaining == 120)
 
-    clock.advance(120)
+    clock.advance(by: 120)
     try failFiveTimes(store)
     #expect(try store.lockoutRemaining == 240)
   }
@@ -108,7 +100,7 @@ struct PINStoreTests {
     try failFiveTimes(store)
 
     #expect(try store.verify(pin("000000")) == .locked(remaining: 60))
-    clock.advance(60)
+    clock.advance(by: 60)
     for _ in 1...4 {
       #expect(try store.verify(pin("000000")) == .rejected)
     }
@@ -120,7 +112,7 @@ struct PINStoreTests {
     try store.set(pin("482913"))
     try failFiveTimes(store)
 
-    clock.advance(60)
+    clock.advance(by: 60)
     #expect(try store.verify(pin("482913")) == .accepted)
   }
 
@@ -146,7 +138,7 @@ struct PINStoreTests {
     let relaunched = makeStore()
     #expect(try relaunched.verify(pin("482913")) == .locked(remaining: 60))
 
-    clock.advance(60)
+    clock.advance(by: 60)
     try failFiveTimes(relaunched)
     #expect(try relaunched.lockoutRemaining == 120)
   }
@@ -156,7 +148,7 @@ struct PINStoreTests {
     try store.set(pin("482913"))
     try failFiveTimes(store)
 
-    clock.advance(-3600)
+    clock.advance(by: -3600)
     #expect(try store.verify(pin("482913")) != .accepted)
     #expect(try store.lockoutRemaining != nil)
   }
@@ -166,9 +158,9 @@ struct PINStoreTests {
     try store.set(pin("482913"))
     try failFiveTimes(store)
 
-    clock.advance(600)
+    clock.advance(by: 600)
     #expect(try store.verify(pin("000000")) == .rejected)
-    clock.advance(-300)
+    clock.advance(by: -300)
 
     #expect(try store.verify(pin("482913")) == .locked(remaining: 300))
   }

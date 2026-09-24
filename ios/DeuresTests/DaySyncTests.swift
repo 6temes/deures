@@ -158,19 +158,6 @@ final class DaySyncTests {
   }
 }
 
-@MainActor
-final class TestClock {
-  var now: Date
-
-  init(_ now: Date) {
-    self.now = now
-  }
-
-  func advance(by seconds: TimeInterval) {
-    now = now.addingTimeInterval(seconds)
-  }
-}
-
 final class RecordingShield: ShieldWriter {
   var store: (any SnapshotStore)?
   private(set) var decisions: [GateDecision] = []
