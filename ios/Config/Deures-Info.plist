@@ -2,6 +2,8 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>AppGroup</key>
+	<string>group.$(BUNDLE_ID_PREFIX).deures</string>
 	<key>AppHost</key>
 	<string>$(APP_HOST)</string>
 	<key>UIApplicationSceneManifest</key>

@@ -15,6 +15,7 @@ let package = Package(
   targets: [
     .target(name: "GateCore"),
     .target(name: "GateKit", dependencies: ["GateCore"]),
-    .testTarget(name: "GateCoreTests", dependencies: ["GateCore"])
+    .testTarget(name: "GateCoreTests", dependencies: ["GateCore"]),
+    .testTarget(name: "GateKitTests", dependencies: ["GateKit"])
   ]
 )

@@ -7,12 +7,16 @@ protocol PairingStatus {
 }
 
 // The device cookie is httponly, so the web view's own store is the only place it can be seen.
-struct DeviceCookiePairing: PairingStatus {
+struct DeviceCookiePairing: DeviceCookieSource, PairingStatus {
   let host: String
 
-  func isPaired() async -> Bool {
+  func deviceCookie() async -> HTTPCookie? {
     let cookies = await WKWebsiteDataStore.default().httpCookieStore.allCookies()
-    return cookies.contains { $0.name == "device_token" && $0.domain.trimmingPrefix(".").lowercased() == host.lowercased() }
+    return cookies.first { $0.name == "device_token" && $0.domain.trimmingPrefix(".").lowercased() == host.lowercased() }
+  }
+
+  func isPaired() async -> Bool {
+    await deviceCookie() != nil
   }
 }
 
