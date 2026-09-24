@@ -1,0 +1,13 @@
+{
+  "settings": {},
+  "rules": [
+    {
+      "patterns": [".*"],
+      "properties": {
+        "context": "default",
+        "presentation": "replace_root",
+        "pull_to_refresh_enabled": false
+      }
+    }
+  ]
+}
