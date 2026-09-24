@@ -165,8 +165,8 @@ The iPad is gated from the next school day.
 ### The PIN
 
 Choose six digits that are not the Screen Time passcode, enter them where the child cannot see,
-and change the PIN if a child may have seen it. A long press in a top corner of the study screen,
-or the lock button on the not-paired and error screens, asks for it, and behind it are Unlock for
+and change the PIN if a child may have seen it. Holding the top-left corner of the study screen for three
+seconds, or the lock button on the not-paired and error screens, asks for it, and behind it are Unlock for
 today, Change allowed apps and Change PIN. Wrong guesses lock the prompt for longer each time.
 
 An iPad that is already paired asks for the PIN before it takes another pairing code, so a child
