@@ -24,4 +24,5 @@ xcodebuild_args=(
 )
 
 xcodebuild build "${xcodebuild_args[@]}"
+# A failing test otherwise runs `simctl diagnose` with a ten-minute timeout before exiting.
 xcodebuild test "${xcodebuild_args[@]}" -collect-test-diagnostics never
