@@ -5,6 +5,9 @@ import UIKit
 @main
 final class AppDelegate: UIResponder, UIApplicationDelegate {
   func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+    #if DEBUG
+    if Probe.isRequested { return true }
+    #endif
     Shell.dayDone = Shell.daySync
     Hotwire.registerBridgeComponents([DayComponent.self])
     Hotwire.registerRouteDecisionHandlers(Shell.routeDecisionHandlers)

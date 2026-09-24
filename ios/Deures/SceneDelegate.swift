@@ -1,4 +1,7 @@
 @preconcurrency import HotwireNative
+#if DEBUG
+import SwiftUI
+#endif
 import UIKit
 
 final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
@@ -19,9 +22,16 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
   func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
     guard let windowScene = scene as? UIWindowScene else { return }
     let window = UIWindow(windowScene: windowScene)
+    self.window = window
+    #if DEBUG
+    if Probe.isRequested {
+      window.rootViewController = UIHostingController(rootView: ProbeView())
+      window.makeKeyAndVisible()
+      return
+    }
+    #endif
     window.rootViewController = navigator.rootViewController
     window.makeKeyAndVisible()
-    self.window = window
 
     if let url = connectionOptions.userActivities.lazy.compactMap(Self.webpageURL).first {
       Task {
@@ -35,6 +45,9 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
   // Also runs on launch, so every launch and every return to the app reads the day and re-evaluates,
   // which is what re-arms the gate on the first launch of each household day.
   func sceneWillEnterForeground(_ scene: UIScene) {
+    #if DEBUG
+    if Probe.isRequested { return }
+    #endif
     Task { await Shell.daySync.sync() }
   }
 
