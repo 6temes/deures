@@ -2,13 +2,15 @@
 #
 # Table name: households
 #
-#  id         :integer          not null, primary key
-#  time_zone  :string           default("Asia/Tokyo"), not null
-#  created_at :datetime         not null
-#  updated_at :datetime         not null
+#  id              :integer          not null, primary key
+#  holiday_country :string           default("jp"), not null
+#  time_zone       :string           default("Asia/Tokyo"), not null
+#  created_at      :datetime         not null
+#  updated_at      :datetime         not null
 #
 class Household < ApplicationRecord
-  validates :time_zone, presence: true
+  validates :holiday_country, :time_zone, presence: true
+  validate :holiday_country_is_known
   validate :time_zone_is_known
   validate :household_is_a_singleton, on: :create
 
@@ -23,7 +25,26 @@ class Household < ApplicationRecord
     Time.use_zone instance.time_zone, &
   end
 
+  def free_day?(date)
+    date.on_weekend? || Holidays.on(date, holiday_region).any?
+  end
+
+  def free_dates(range)
+    holidays = Holidays.between(range.begin, range.end, holiday_region).pluck(:date)
+    range.select { it.on_weekend? || holidays.include?(it) }
+  end
+
   private
+
+  def holiday_region
+    holiday_country.to_sym
+  end
+
+  def holiday_country_is_known
+    return if holiday_country.blank? || Holidays.available_regions.include?(holiday_region)
+
+    errors.add :holiday_country, "is not a region the holidays gem knows"
+  end
 
   def time_zone_is_known
     return if time_zone.blank? || ActiveSupport::TimeZone[time_zone]

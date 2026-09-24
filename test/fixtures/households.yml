@@ -2,10 +2,12 @@
 #
 # Table name: households
 #
-#  id         :integer          not null, primary key
-#  time_zone  :string           default("Asia/Tokyo"), not null
-#  created_at :datetime         not null
-#  updated_at :datetime         not null
+#  id              :integer          not null, primary key
+#  holiday_country :string           default("jp"), not null
+#  time_zone       :string           default("Asia/Tokyo"), not null
+#  created_at      :datetime         not null
+#  updated_at      :datetime         not null
 #
 tokyo:
+  holiday_country: jp
   time_zone: Asia/Tokyo
