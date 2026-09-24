@@ -43,8 +43,7 @@ extension GateEvaluator {
   // about to start. The next date is counted in the household's zone, as the gate counts today.
   @discardableResult
   public func evaluateFollowingDay(after now: Date) -> GateDecision {
-    var calendar = Calendar(identifier: .gregorian)
-    calendar.timeZone = store.load()?.zone ?? deviceZone()
+    let calendar = CalendarDay.calendar(in: store.load()?.zone ?? deviceZone())
     return evaluate(now: calendar.date(byAdding: .day, value: 1, to: calendar.startOfDay(for: now))!)
   }
 }

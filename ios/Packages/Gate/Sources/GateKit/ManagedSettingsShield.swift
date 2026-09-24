@@ -23,4 +23,11 @@ public struct ManagedSettingsShield: ShieldWriter {
     }
   }
 }
+
+extension GateEvaluator {
+  // The app and the monitor extension each build the gate from the same three pieces.
+  public static func live(appGroup: String) -> GateEvaluator {
+    GateEvaluator(store: DefaultsSnapshotStore(suiteName: appGroup), setup: KeychainSetupFlag(accessGroup: appGroup), shield: ManagedSettingsShield())
+  }
+}
 #endif

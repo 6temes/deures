@@ -30,7 +30,7 @@ class Household < ApplicationRecord
   end
 
   def free_dates(range)
-    holidays = Holidays.between(range.begin, range.end, holiday_region).pluck(:date)
+    holidays = Holidays.between(range.begin, range.end, holiday_region).pluck(:date).to_set
     range.select { it.on_weekend? || holidays.include?(it) }
   end
 

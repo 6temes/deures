@@ -34,13 +34,17 @@ final class PINPrompt {
     case let .locked(remaining):
       status = .locked(remaining: remaining)
     case .rejected:
-      status = (try? pins.lockoutRemaining).flatMap { $0 }.map { .locked(remaining: $0) } ?? .wrong
+      status = lockout.map { .locked(remaining: $0) } ?? .wrong
     }
     return false
   }
 
+  private var lockout: TimeInterval? {
+    (try? pins.lockoutRemaining).flatMap { $0 }
+  }
+
   func refresh() {
-    if let remaining = (try? pins.lockoutRemaining).flatMap({ $0 }) {
+    if let remaining = lockout {
       status = .locked(remaining: remaining)
     } else if case .locked = status {
       status = .ready

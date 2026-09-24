@@ -6,11 +6,7 @@ import os
 extension Shell {
   nonisolated static let appGroup = Bundle.main.object(forInfoDictionaryKey: "AppGroup") as! String
 
-  static let evaluator = GateEvaluator(
-    store: DefaultsSnapshotStore(suiteName: appGroup),
-    setup: KeychainSetupFlag(accessGroup: appGroup),
-    shield: ManagedSettingsShield()
-  )
+  static let evaluator = GateEvaluator.live(appGroup: appGroup)
 
   static let daySync = DaySync(
     startLocation: startLocation,

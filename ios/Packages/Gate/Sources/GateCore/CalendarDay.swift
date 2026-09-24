@@ -29,7 +29,7 @@ public struct CalendarDay: Comparable, Hashable, Sendable {
     (lhs.year, lhs.month, lhs.day) < (rhs.year, rhs.month, rhs.day)
   }
 
-  private static func calendar(in zone: TimeZone) -> Calendar {
+  public static func calendar(in zone: TimeZone) -> Calendar {
     var calendar = Calendar(identifier: .gregorian)
     calendar.timeZone = zone
     return calendar
