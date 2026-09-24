@@ -21,6 +21,8 @@ final class DaySync: DayDoneHandling {
   private let dayURL: URL
   private let evaluator: GateEvaluator
   private let session: URLSession
+  private var rerun = false
+  private var syncing: Task<GateDecision, Never>?
 
   init(startLocation: URL, cookies: any DeviceCookieSource, session: URLSession, evaluator: GateEvaluator, clock: @escaping () -> Date = Date.init) {
     self.clock = clock
@@ -40,8 +42,30 @@ final class DaySync: DayDoneHandling {
     return configuration
   }
 
+  // One fetch at a time, so a slow answer can never land over a fresher one. A sync asked for while
+  // one is running is folded into a single fetch that starts after the running one ends, so what
+  // the caller recorded before asking, such as a bridge `done`, is in what the server is asked.
   @discardableResult
   func sync() async -> GateDecision {
+    if let syncing {
+      rerun = true
+      return await syncing.value
+    }
+
+    let task = Task {
+      var decision: GateDecision
+      repeat {
+        rerun = false
+        decision = await syncOnce()
+      } while rerun
+      syncing = nil
+      return decision
+    }
+    syncing = task
+    return await task.value
+  }
+
+  private func syncOnce() async -> GateDecision {
     switch await fetch() {
     case let .answer(answer):
       let now = clock()

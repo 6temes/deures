@@ -143,6 +143,25 @@ final class DaySyncTests {
     #expect(shield.decisions == [.clear, shielded])
   }
 
+  // A return to the app and a bridge `done` can each start a sync. A slow answer fetched first must
+  // not land after, and over, the answer fetched once the day was done.
+  @Test func overlappingSyncsFetchOneAfterAnotherSoTheFresherAnswerStays() async throws {
+    paired()
+    StubDay.answer(state: "pending", today: "2026-09-14", after: 0.5)
+    StubDay.answer(state: "done", today: "2026-09-14", after: 0)
+    let daySync = sync()
+
+    let first = Task { await daySync.sync() }
+    try await StubDay.waitForRequests(1)
+    async let second = daySync.sync()
+    async let third = daySync.sync()
+    _ = await (first.value, second, third)
+
+    #expect(StubDay.requests.count == 2)
+    #expect(store.load()?.lastAnswer?.state == .done)
+    #expect(shield.decisions.last == .clear)
+  }
+
   @Test func theLatestServerTodayAdvancesAndNeverGoesBack() async {
     paired { $0.latestServerToday = CalendarDay("2026-09-14")! }
     let daySync = sync()
@@ -190,11 +209,26 @@ final class StubDay: URLProtocol {
   }
 
   nonisolated(unsafe) private static var response = Response.network
+  nonisolated(unsafe) private static var queued: [(delay: TimeInterval, response: Response)] = []
   nonisolated(unsafe) private(set) static var requests: [URLRequest] = []
 
   static func reset() {
     response = .network
+    queued = []
     requests = []
+  }
+
+  // Queues answers served one per request, in order, each after its own delay.
+  static func answer(state: String, today: String, after delay: TimeInterval) {
+    answer(state: state, today: today)
+    queued.append((delay, response))
+  }
+
+  static func waitForRequests(_ count: Int) async throws {
+    for _ in 1...200 where requests.count < count {
+      try await Task.sleep(for: .milliseconds(10))
+    }
+    try #require(requests.count >= count)
   }
 
   static func answer(state: String, today: String) {
@@ -215,7 +249,16 @@ final class StubDay: URLProtocol {
 
   override func startLoading() {
     Self.requests.append(request)
-    switch Self.response {
+    guard Self.queued.isEmpty else {
+      let (delay, response) = Self.queued.removeFirst()
+      DispatchQueue.global().asyncAfter(deadline: .now() + delay) { self.respond(response) }
+      return
+    }
+    respond(Self.response)
+  }
+
+  private func respond(_ response: Response) {
+    switch response {
     case .network:
       client?.urlProtocol(self, didFailWithError: URLError(.notConnectedToInternet))
     case let .http(status, body):
