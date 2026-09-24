@@ -8,8 +8,9 @@ protocol SetupFlagRecording: SetupFlagReader {
 
 extension KeychainSetupFlag: SetupFlagRecording {}
 
-// First run: a PIN, then the allowlist, then "setup completed", then the child's pairing code. The
-// flag is what turns the gate on, so it is written only once the allowlist it shields around is saved.
+// First run: a PIN, then the allowlist, then the child's pairing code, then "setup completed". The
+// flag is what turns the gate on, so it is written only when the parent taps Done: written any
+// earlier, returning to Deures from the Camera before scanning would raise the shield.
 @MainActor
 @Observable
 final class SetupFlow {
@@ -20,6 +21,7 @@ final class SetupFlow {
     case scanPairingCode
   }
 
+  private(set) var failed = false
   private(set) var refusedAllowlist = false
   private(set) var step: Step
 
@@ -78,17 +80,19 @@ final class SetupFlow {
     var snapshot = evaluator.store.load() ?? Snapshot()
     snapshot.allowlist = choice.data
     evaluator.store.save(snapshot)
-    do {
-      try flag.recordCompleted()
-      step = .scanPairingCode
-    } catch {
-      refusedAllowlist = true
-    }
+    step = .scanPairingCode
   }
 
   // The shield goes up only now, so the parent can still reach the Camera to scan the pairing code.
   func finish() {
     guard step == .scanPairingCode else { return }
+    do {
+      try flag.recordCompleted()
+    } catch {
+      failed = true
+      return
+    }
+    failed = false
     evaluator.evaluate(now: clock())
     finished()
   }

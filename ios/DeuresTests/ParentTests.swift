@@ -21,6 +21,9 @@ final class MemorySnapshotStore: SnapshotStore {
 }
 
 final class RecordingSetupFlag: SetupFlagRecording {
+  struct Failure: Error {}
+
+  var failing = false
   var flag = SetupFlag.absent
   private let store: any SnapshotStore
   private(set) var allowlistWhenRecorded: [Data?] = []
@@ -34,6 +37,7 @@ final class RecordingSetupFlag: SetupFlagRecording {
   }
 
   func recordCompleted() throws {
+    if failing { throw Failure() }
     allowlistWhenRecorded.append(store.load()?.allowlist)
     flag = .completed
   }
@@ -267,7 +271,7 @@ struct ParentSessionTests {
 
 @MainActor
 struct SetupFlowTests {
-  @Test func firstRunSetsThePINThenSavesTheAllowlistThenRecordsTheFlag() throws {
+  @Test func firstRunSetsThePINThenSavesTheAllowlistThenRecordsTheFlagOnlyWhenTheParentFinishes() throws {
     let fixture = ParentFixture(setup: .absent)
     let setup = fixture.setup()
 
@@ -276,12 +280,17 @@ struct SetupFlowTests {
     setup.enterNewPIN("482913")
     #expect(setup.step == .allowlist)
     #expect(try fixture.pins.verify(pin("482913")) == .accepted)
-    #expect(fixture.flag.allowlistWhenRecorded.isEmpty)
 
     setup.save(fixture.choice())
+    #expect(setup.step == .scanPairingCode)
+    #expect(fixture.store.load()?.allowlist == fixture.allowlist)
+    #expect(fixture.flag.allowlistWhenRecorded.isEmpty)
+    #expect(fixture.flag.read() == .absent)
+
+    setup.finish()
 
     #expect(fixture.flag.allowlistWhenRecorded == [fixture.allowlist])
-    #expect(setup.step == .scanPairingCode)
+    #expect(fixture.flag.read() == .completed)
   }
 
   @Test func theGateIsEvaluatedWhenTheParentFinishes() {
@@ -296,6 +305,31 @@ struct SetupFlowTests {
     setup.finish()
 
     #expect(fixture.shield.decisions == [.apply(exceptions: fixture.allowlist)])
+    #expect(finished)
+  }
+
+  @Test func aFlagThatCannotBeWrittenStopsSetupAndSaysSo() {
+    let fixture = ParentFixture(setup: .absent)
+    fixture.flag.failing = true
+    var finished = false
+    let setup = fixture.setup { finished = true }
+    setup.enterNewPIN("482913")
+    setup.enterNewPIN("482913")
+    setup.save(fixture.choice())
+
+    setup.finish()
+
+    #expect(setup.failed)
+    #expect(!setup.refusedAllowlist)
+    #expect(setup.step == .scanPairingCode)
+    #expect(fixture.shield.decisions.isEmpty)
+    #expect(!finished)
+
+    fixture.flag.failing = false
+    setup.finish()
+
+    #expect(!setup.failed)
+    #expect(fixture.flag.read() == .completed)
     #expect(finished)
   }
 

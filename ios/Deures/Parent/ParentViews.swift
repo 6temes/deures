@@ -65,7 +65,7 @@ struct SetupView: View {
         case .allowlist:
           AllowlistEditor(initial: nil, save: flow.save)
         case .scanPairingCode:
-          ScanPairingCodeView(done: flow.finish)
+          ScanPairingCodeView(failed: flow.failed, done: flow.finish)
         }
       }
       .navigationTitle("Set up Deures")
@@ -74,6 +74,7 @@ struct SetupView: View {
 }
 
 private struct ScanPairingCodeView: View {
+  let failed: Bool
   let done: () -> Void
 
   var body: some View {
@@ -86,6 +87,10 @@ private struct ScanPairingCodeView: View {
       Text("Allowed apps start being enforced when you tap Done.")
         .font(.callout)
         .foregroundStyle(.secondary)
+      if failed {
+        Text("Setup could not be saved on this iPad. Tap Done to try again.")
+          .foregroundStyle(.red)
+      }
       Button("Done", action: done).buttonStyle(.borderedProminent)
     }
     .padding(32)
