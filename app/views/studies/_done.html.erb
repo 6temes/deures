@@ -1,4 +1,4 @@
-<%# locals: (celebrate:, child:) -%>
+<%# locals: (celebrate:, child:, date:) -%>
 <%#
   The end of the day, in the box the questions were in: the child's name, and no sentence. The
   stars are the progress row above, which is full by definition at this point and grows into
@@ -7,6 +7,7 @@
   reveals it.
 %>
 
-<%= tag.div class: "done", data: { screen: "done", controller: ("done" if celebrate) } do %>
+<% bridge = { "bridge--day-child-id-value": child.id, "bridge--day-date-value": date.iso8601 } %>
+<%= tag.div class: "done", data: { screen: "done", controller: token_list(done: celebrate, "bridge--day": true), **bridge } do %>
   <div class="done-name"><%= child.name %></div>
 <% end %>

@@ -16,7 +16,7 @@
 
   <div id="card" class="card">
     <%= render "studies/card", item: @item if @item %>
-    <%= render "studies/done", celebrate: @celebrate, child: @child if @study_day.done_at? %>
+    <%= render "studies/done", celebrate: @celebrate, child: @child, date: @study_day.study_date if @study_day.done_at? %>
   </div>
 
   <%= render "studies/pad" if @item %>

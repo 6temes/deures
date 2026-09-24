@@ -15,4 +15,6 @@ Rails.application.routes.draw do
   # after it unless format is turned off — so "manifest.webmanifest.json" would otherwise also
   # route, rendered as JSON, when it should 404 like any other unrecognized path.
   get "p/manifest.webmanifest" => "pairings#manifest", :as => :pairing_manifest, :format => false
+
+  get ".well-known/apple-app-site-association" => "well_knowns#apple_app_site_association", :format => false
 end

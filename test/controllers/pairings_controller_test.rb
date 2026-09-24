@@ -2,6 +2,8 @@ require "test_helper"
 
 class PairingsControllerTest < ActionDispatch::IntegrationTest
   FORGED_TOKEN = "kQ5r1zFQTSjmrGWJ8Vc3oLbXpNdYhA2eu7T0iCsRfMw"
+  HOTWIRE_NATIVE = "Mozilla/5.0 (iPad; CPU OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) " \
+    "Mobile/15E148 Hotwire Native iOS; Turbo Native iOS; bridge-components: [day]"
 
   setup do
     @child = children(:pau)
@@ -17,6 +19,25 @@ class PairingsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_equal @child, Device.find_by_token(cookies[Authentication::COOKIE]).child
     assert_select "[data-screen=install]"
+  end
+
+  test "the app opening a fresh pairing link pairs it and goes straight to the study screen" do
+    assert_difference -> { Device.count }, 1 do
+      get pairing_path(token: @token), headers: {"User-Agent" => HOTWIRE_NATIVE}
+    end
+
+    assert_redirected_to root_path
+    assert_equal @child, Device.find_by_token(cookies[Authentication::COOKIE]).child
+  end
+
+  test "the app opening a spent link still gets the lost-identity screen, not the study screen" do
+    get pairing_path(token: @token)
+
+    other_ipad = open_session
+    other_ipad.get pairing_path(token: @token), headers: {"User-Agent" => HOTWIRE_NATIVE}
+
+    assert_equal 404, other_ipad.response.status
+    assert_select other_ipad.html_document.root, "[data-screen=lost-identity]"
   end
 
   test "the same token presented by another iPad pairs nothing and renders the lost-identity screen" do

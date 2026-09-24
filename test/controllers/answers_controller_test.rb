@@ -311,7 +311,9 @@ class AnswersControllerTest < ActionDispatch::IntegrationTest
 
     assert_turbo_stream action: "update", target: "card" do
       assert_select ".verdict .echo", "42"
-      assert_select "[data-screen=done][data-controller=done]"
+      assert_select "[data-screen=done][data-controller~=done]"
+      assert_select "[data-screen=done][data-controller~='bridge--day']" \
+        "[data-bridge--day-child-id-value='#{@child.id}'][data-bridge--day-date-value='2026-09-14']"
       assert_select ".question", false
     end
     assert_progress cleared: 2, of: 2, within: "turbo-stream[target=progress] template"
@@ -327,7 +329,7 @@ class AnswersControllerTest < ActionDispatch::IntegrationTest
 
     assert_turbo_stream action: "update", target: "card" do
       assert_select ".correction .expected", "42"
-      assert_select "[data-screen=done][data-controller=done]"
+      assert_select "[data-screen=done][data-controller~=done]"
       assert_select ".verdict", false
     end
   end

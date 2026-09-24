@@ -409,6 +409,23 @@ class StudyTest < ApplicationSystemTestCase
     assert_progress cleared: 1, of: 1
   end
 
+  test "finishing a day in a browser tells no app and logs no error, and the reopened day carries the same signal" do
+    study_days(:pau_today).remove_card! cards(:sum_38_27)
+    visit "/"
+    browser_errors
+
+    answer "42"
+
+    assert_selector "[data-screen=done].celebrating", text: "Pau"
+    assert_day_signal children(:pau), "2026-09-14"
+
+    visit "/"
+
+    assert_selector "[data-screen=done]", text: "Pau"
+    assert_day_signal children(:pau), "2026-09-14"
+    assert_empty browser_errors
+  end
+
   test "the done screen waits under the correction until the copy's last digit reveals it" do
     study_days(:pau_today).remove_card! cards(:sum_23_19)
     visit "/"
@@ -516,6 +533,17 @@ class StudyTest < ApplicationSystemTestCase
   def open_study_screen(child)
     visit pairing_path(token: child.pairing_links.create!.generate_token_for(:invitation))
     visit "/"
+  end
+
+  def assert_day_signal(child, date)
+    assert_selector "[data-screen=done][data-controller~='bridge--day']" \
+      "[data-bridge--day-child-id-value='#{child.id}'][data-bridge--day-date-value='#{date}']"
+  end
+
+  # Read from Chrome's own log rather than from a patched console.error, so a module that fails
+  # to import while the page loads is caught too. Reading it empties it.
+  def browser_errors
+    page.driver.browser.logs.get(:browser).select { it.level == "SEVERE" }.map(&:message)
   end
 
   def custom_property(selector, name)

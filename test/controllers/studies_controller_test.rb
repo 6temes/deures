@@ -223,7 +223,7 @@ class StudiesControllerTest < ActionDispatch::IntegrationTest
 
     get "/"
 
-    assert_select "[data-screen=done][data-controller=done]"
+    assert_select "[data-screen=done][data-controller~=done]"
     assert_select ".question", false
     assert_equal Time.utc(2026, 9, 13, 23, 30), day.reload.done_seen_at
 
@@ -231,8 +231,20 @@ class StudiesControllerTest < ActionDispatch::IntegrationTest
     get "/"
 
     assert_select "[data-screen=done]"
-    assert_select "[data-screen=done][data-controller=done]", false
+    assert_select "[data-screen=done][data-controller~=done]", false
     assert_equal Time.utc(2026, 9, 13, 23, 30), day.reload.done_seen_at
+  end
+
+  test "the done screen tells the app which child finished which day, whether or not it celebrates" do
+    pair_device_as @child
+    finished_day
+
+    2.times do
+      get "/"
+
+      assert_select "[data-screen=done][data-controller~='bridge--day']" \
+        "[data-bridge--day-child-id-value='#{@child.id}'][data-bridge--day-date-value='2026-09-14']"
+    end
   end
 
   test "the done screen carries no sentence: the child's name, and the row they filled" do
