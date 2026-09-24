@@ -31,6 +31,10 @@ gem "json", "~> 2.21"
 # [https://github.com/whomwah/rqrcode_core]
 gem "rqrcode_core"
 
+# Free days are weekends and the public holidays of the household country
+# [https://github.com/holidays/holidays]
+gem "holidays"
+
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem
 gem "tzinfo-data", platforms: %i[windows jruby]
 

@@ -50,6 +50,44 @@ class SecretsGuardTest < ActiveSupport::TestCase
     assert_includes refused, "an AWS access key id"
   end
 
+  test "refuses a staged Local.xcconfig and names the file" do
+    refused = stage("ios/Config/Local.xcconfig" => "APP_HOST = example.test\n")
+    assert_includes refused, "ios/Config/Local.xcconfig"
+    assert_includes refused, "household"
+  end
+
+  test "passes the committed xcconfig template" do
+    assert_nil stage("ios/Config/Local.example.xcconfig" => "APP_HOST = \n")
+  end
+
+  test "refuses a Team ID written into the Xcode project by the Signing screen" do
+    refused = stage("ios/Deures.xcodeproj/project.pbxproj" => "\t\t\t\tDEVELOPMENT_TEAM = ABCDE12345;\n")
+    assert_includes refused, "project.pbxproj:1"
+    assert_includes refused, "Team ID"
+  end
+
+  test "refuses a Team ID written under the target attributes of the Xcode project" do
+    refused = stage("ios/Deures.xcodeproj/project.pbxproj" => "\t\t\t\t\t\tDevelopmentTeam = ABCDE12345;\n")
+    assert_includes refused, "project.pbxproj:1"
+    assert_includes refused, "Team ID"
+  end
+
+  test "refuses a Team ID in an xcconfig, quoted or not" do
+    assert_includes stage("ios/Config/Base.xcconfig" => "DEVELOPMENT_TEAM = ABCDE12345\n"), "Team ID"
+    assert_includes stage("ios/Config/Base.xcconfig" => %(DEVELOPMENT_TEAM = "ABCDE12345";\n)), "Team ID"
+  end
+
+  test "passes an empty or indirect Team ID" do
+    assert_nil stage(
+      "ios/Deures.xcodeproj/project.pbxproj" => %(DEVELOPMENT_TEAM = "";\n),
+      "ios/Config/Base.xcconfig" => "DEVELOPMENT_TEAM = $(TEAM_ID)\n"
+    )
+  end
+
+  test "passes a Team ID line outside the Xcode project files" do
+    assert_nil stage("README.md" => "    DEVELOPMENT_TEAM = ABCDE12345\n")
+  end
+
   test "passes a commit that carries none of them" do
     assert_nil stage("app/models/card.rb" => "class Card < ApplicationRecord\nend\n")
   end

@@ -1,5 +1,25 @@
 module Ops
   module Households
+    class SetHolidayCountry < Ops::Base
+      operation name: "household.set_holiday_country",
+        description: "Set the country whose public holidays are free days, alongside every weekend.",
+        example: %(Ops::Households::SetHolidayCountry.call country: "es")
+
+      def initialize(country:)
+        @country = country
+      end
+
+      def perform
+        refuse! %(no holiday region called "#{@country}" — pass one the holidays gem knows, such as "jp") unless Holidays.available_regions.include?(@country.to_sym)
+
+        household = Household.instance
+        before = household.holiday_country
+        household.update! holiday_country: @country
+
+        "household holiday country #{before} → #{@country}"
+      end
+    end
+
     class SetTimeZone < Ops::Base
       operation name: "household.set_time_zone",
         description: "Set the time zone every study date in the app is the calendar date in.",

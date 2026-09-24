@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+# The iOS half of the checks, run on a Mac: bin/ci runs on Linux and cannot build for iOS.
+set -euo pipefail
+
+ios="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+derived_data="$ios/.build/DerivedData"
+simulator_name="Deures iPad"
+
+swift test --package-path "$ios/Packages/Gate"
+
+simulator="$(xcrun simctl list devices available | grep -m 1 -E '^ +[^(]*iPad' | grep -oE '[0-9A-F-]{36}' || true)"
+if [ -z "$simulator" ]; then
+  runtime="$(xcrun simctl list runtimes available | grep -E '^iOS ' | tail -n 1 | grep -oE 'com\.apple\.CoreSimulator\.SimRuntime\.iOS-[0-9-]+')"
+  device_type="$(xcrun simctl list devicetypes | grep -m 1 -E '^iPad \(' | grep -oE 'com\.apple\.CoreSimulator\.SimDeviceType\.[A-Za-z0-9-]+')"
+  simulator="$(xcrun simctl create "$simulator_name" "$device_type" "$runtime")"
+fi
+
+xcodebuild_args=(
+  -project "$ios/Deures.xcodeproj"
+  -scheme Deures
+  -destination "platform=iOS Simulator,id=$simulator"
+  -derivedDataPath "$derived_data"
+  CODE_SIGNING_ALLOWED=NO
+)
+
+xcodebuild build "${xcodebuild_args[@]}"
+# A failing test otherwise runs `simctl diagnose` with a ten-minute timeout before exiting.
+xcodebuild test "${xcodebuild_args[@]}" -collect-test-diagnostics never

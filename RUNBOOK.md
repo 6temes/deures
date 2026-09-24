@@ -106,3 +106,120 @@ It has to print the children and where they are today. If the server will not st
 listing comes back empty, the restore did not put the database back — and the replicator must
 not be allowed to run against a database the restore did not write, because it will copy that
 one over the real history.
+
+## The iPad app
+
+The app in `ios/` shows the same study screen, and adds a gate: on a school day, until that
+child's day is done, Screen Time shields every app on the iPad but Deures and the few the parent
+allows. It replaces the Home Screen icon from [Pairing an iPad](#pairing-an-ipad). The pairing code
+is the same one, and on an iPad with the app the camera opens the app with it rather than Safari.
+
+### Before the first install
+
+Family Controls, the framework the gate is built on, needs a paid Apple Developer Program
+membership. A free account cannot sign an app that uses it.
+
+The household's values live in `ios/Config/Local.xcconfig`, which is git-ignored and which
+`bin/secrets_guard` refuses. Copy `ios/Config/Local.example.xcconfig` to it and fill in the Team
+ID, a bundle prefix of your own, and `APP_HOST`. That host has to be exactly the one
+`Ops::Devices::IssueLink` prints links for, or the app will not take a pairing link. Signing reads
+the team from that file, so there is nothing to set on Xcode's Signing screen.
+
+The server has to be serving the association file before the first pairing: set `APPLE_APP_ID`
+in the deployment, as the [README](README.md#running-it-for-real) says, to the Team ID, a dot,
+and `<BUNDLE_ID_PREFIX>.deures`. Without it the pairing code opens Safari. The deploy workflow does
+not carry it yet: add it as a repository secret, to the deploy job's `env`, and to the list its
+preflight step checks, all three together.
+
+### Installing
+
+On the child's iPad, signed in to the child's Apple Account, turn on Settings › Privacy & Security
+› Developer Mode, which restarts it. Connect it to the Mac, choose it as the destination of the
+Deures scheme, and run. Then turn on Settings › Developer › Associated Domains Development. A
+development build asks for its association with `?mode=developer`, which the iPad honours only
+with that switch on, and it then fetches the file from the server itself.
+
+A development install stops opening when its signing expires, a year after it was signed. Run it
+from Xcode again before then, over the top of the installed app rather than after deleting it, so
+the setup and the pairing are kept.
+
+### Setting it up
+
+The first launch asks for Screen Time permission, which the parent approves with their own Apple
+Account. Then it asks for the PIN, twice, then for the allowed apps, and last for the pairing
+code, which is scanned with the Camera like any other. Pick individual apps rather than
+categories: a shield over every category cannot exempt a whole category. Apple caps the list at 50
+apps, and the picker will not save more.
+
+Then, on the iPad:
+
+- **Set a Screen Time passcode** in Settings › Screen Time, if it has none. It is what stops a
+  child deleting the app or turning off its Screen Time access. Turning that access off lifts
+  every shield at once and the app cannot put one back, which makes it the one exception to
+  blocking by default; while it is off, the app shows an "ask a grown-up" screen.
+- **Keep Downtime for bedtime, and turn App Limits off.** Downtime is Apple's own and the gate
+  leaves it alone. App Limits shield apps too, and with them on, a shielded app during the day is
+  no longer the gate's doing.
+- **Delete the old Home Screen icon.**
+
+The iPad is gated from the next school day.
+
+### The PIN
+
+Choose six digits that are not the Screen Time passcode, enter them where the child cannot see,
+and change the PIN if a child may have seen it. Holding the top-left corner of the study screen for three
+seconds, or the lock button on the not-paired and error screens, asks for it, and behind it are Unlock for
+today, Change allowed apps and Change PIN. Wrong guesses lock the prompt for longer each time.
+
+An iPad that is already paired asks for the PIN before it takes another pairing code, so a child
+cannot scan a sibling's code to reach a day that is already done.
+
+A forgotten PIN is recovered in Settings, not in the app. Turn Deures's Screen Time access off in
+Settings › Screen Time, behind the Screen Time passcode, which lifts the gate. Turning it back on
+is a fresh approval, and that lets setup set a new PIN.
+
+### Holidays
+
+Weekends are free days, and so are the public holidays of the household's country, which is Japan
+until it is changed:
+
+```ruby
+Ops::Households::SetHolidayCountry.call country: "es"
+```
+
+The app reads the free days from `GET /day`, so an iPad picks up the change the next time it
+opens Deures.
+
+### The drills
+
+No part of the gate can be tested off a real iPad, so these are the proof that it works. Run them
+on a child-account iPad before either child is handed one, in this order.
+
+D1 and D2 are the stop conditions. If either fails, stop: the gate cannot work on these iPads as
+designed, and that goes back to the parent as a decision rather than being fixed in the app. Both
+run before setup, from Xcode with the launch argument `-DeuresProbe YES` in the scheme's Run
+arguments, which opens a debug-only probe in place of the app.
+
+- **D1.** Install from Xcode with Developer Mode on, and grant `.child` authorization. Stop if
+  either fails. In the probe, Request child authorization, and the status has to read approved.
+- **D2.** Pick an allowlist with Messages and one game, and leave the day pending. The game opens,
+  every other app shows the shield, and Deures opens and its study page loads and takes an answer.
+  Stop if the allowlisted game is shielded too (Apple's open defect FB15500605). If only the study
+  page is blocked, change the shield to cover app categories only, which still blocks Safari and
+  every other browser, and repeat. In the probe, Pick the allowlist, then Shield all except picked.
+  For the study page, run again without the launch argument and pair: until setup is completed the
+  app leaves the probe's shield as it is. Clear lifts it afterwards.
+- **D8.** As the child, try to change the date, the time zone, and Set Automatically, and try to
+  delete, offload or revoke Deures. Every attempt should be refused. If the date can be changed,
+  record it: an offline jump to a free day is then an accepted risk.
+- **D3.** Finish the day's cards. The shield lifts when the done screen appears. Then enter the
+  PIN on a new pending day, and the shield lifts.
+- **D4.** Force-quit, reboot and go offline on a pending school day. The shield stays.
+- **D5.** Leave the iPad unused overnight after an unlocked day, then open it on a school morning.
+  The shield is back.
+- **D6.** Excuse the day from the console, with `Ops::Relief::Excuse`, then open Deures. The
+  shield lifts.
+- **D7.** Scan a fresh `IssueLink` code with the Camera on an unpaired app. The app opens and
+  pairs, and Safari does not open.
+- **D9.** Scan the other child's code on a gated, paired iPad. The PIN prompt appears, and the code
+  is not used.

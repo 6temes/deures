@@ -1,0 +1,557 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		D0000000000000000000B001 /* HotwireNative in Frameworks */ = {isa = PBXBuildFile; productRef = D0000000000000000000C001 /* HotwireNative */; };
+		D0000000000000000000B002 /* GateKit in Frameworks */ = {isa = PBXBuildFile; productRef = D0000000000000000000C002 /* GateKit */; };
+		D0000000000000000000B003 /* GateKit in Frameworks */ = {isa = PBXBuildFile; productRef = D0000000000000000000C003 /* GateKit */; };
+		D0000000000000000000B004 /* DeuresMonitor.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = D0000000000000000000A002 /* DeuresMonitor.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		D0000000000000000000E001 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D0000000000000000000F001 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = D00000000000000000001002;
+			remoteInfo = DeuresMonitor;
+		};
+		D0000000000000000000E002 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D0000000000000000000F001 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = D00000000000000000001001;
+			remoteInfo = Deures;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		D00000000000000000002004 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				D0000000000000000000B004 /* DeuresMonitor.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		D0000000000000000000A001 /* Deures.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Deures.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		D0000000000000000000A002 /* DeuresMonitor.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = DeuresMonitor.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		D0000000000000000000A003 /* DeuresTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = DeuresTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		D0000000000000000000A011 /* Base.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Base.xcconfig; sourceTree = "<group>"; };
+		D0000000000000000000A012 /* Local.example.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Local.example.xcconfig; sourceTree = "<group>"; };
+		D0000000000000000000A013 /* Deures-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "Deures-Info.plist"; sourceTree = "<group>"; };
+		D0000000000000000000A014 /* Deures.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Deures.entitlements; sourceTree = "<group>"; };
+		D0000000000000000000A015 /* Monitor-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "Monitor-Info.plist"; sourceTree = "<group>"; };
+		D0000000000000000000A016 /* Monitor.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Monitor.entitlements; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		D00000000000000000004001 /* Deures */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Deures;
+			sourceTree = "<group>";
+		};
+		D00000000000000000004002 /* DeuresMonitor */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = DeuresMonitor;
+			sourceTree = "<group>";
+		};
+		D00000000000000000004003 /* DeuresTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = DeuresTests;
+			sourceTree = "<group>";
+		};
+/* End PBXFileSystemSynchronizedRootGroup section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		D00000000000000000002002 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D0000000000000000000B001 /* HotwireNative in Frameworks */,
+				D0000000000000000000B002 /* GateKit in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D00000000000000000002012 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D0000000000000000000B003 /* GateKit in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D00000000000000000002022 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		D00000000000000000003001 = {
+			isa = PBXGroup;
+			children = (
+				D00000000000000000003003 /* Config */,
+				D00000000000000000004001 /* Deures */,
+				D00000000000000000004002 /* DeuresMonitor */,
+				D00000000000000000004003 /* DeuresTests */,
+				D00000000000000000003002 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		D00000000000000000003002 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				D0000000000000000000A001 /* Deures.app */,
+				D0000000000000000000A002 /* DeuresMonitor.appex */,
+				D0000000000000000000A003 /* DeuresTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		D00000000000000000003003 /* Config */ = {
+			isa = PBXGroup;
+			children = (
+				D0000000000000000000A011 /* Base.xcconfig */,
+				D0000000000000000000A012 /* Local.example.xcconfig */,
+				D0000000000000000000A013 /* Deures-Info.plist */,
+				D0000000000000000000A014 /* Deures.entitlements */,
+				D0000000000000000000A015 /* Monitor-Info.plist */,
+				D0000000000000000000A016 /* Monitor.entitlements */,
+			);
+			path = Config;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		D00000000000000000001001 /* Deures */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = D00000000000000000005010 /* Build configuration list for PBXNativeTarget "Deures" */;
+			buildPhases = (
+				D00000000000000000002001 /* Sources */,
+				D00000000000000000002002 /* Frameworks */,
+				D00000000000000000002003 /* Resources */,
+				D00000000000000000002004 /* Embed Foundation Extensions */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				D00000000000000000006001 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				D00000000000000000004001 /* Deures */,
+			);
+			name = Deures;
+			packageProductDependencies = (
+				D0000000000000000000C001 /* HotwireNative */,
+				D0000000000000000000C002 /* GateKit */,
+			);
+			productName = Deures;
+			productReference = D0000000000000000000A001 /* Deures.app */;
+			productType = "com.apple.product-type.application";
+		};
+		D00000000000000000001002 /* DeuresMonitor */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = D00000000000000000005020 /* Build configuration list for PBXNativeTarget "DeuresMonitor" */;
+			buildPhases = (
+				D00000000000000000002011 /* Sources */,
+				D00000000000000000002012 /* Frameworks */,
+				D00000000000000000002013 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				D00000000000000000004002 /* DeuresMonitor */,
+			);
+			name = DeuresMonitor;
+			packageProductDependencies = (
+				D0000000000000000000C003 /* GateKit */,
+			);
+			productName = DeuresMonitor;
+			productReference = D0000000000000000000A002 /* DeuresMonitor.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+		D00000000000000000001003 /* DeuresTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = D00000000000000000005030 /* Build configuration list for PBXNativeTarget "DeuresTests" */;
+			buildPhases = (
+				D00000000000000000002021 /* Sources */,
+				D00000000000000000002022 /* Frameworks */,
+				D00000000000000000002023 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				D00000000000000000006002 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				D00000000000000000004003 /* DeuresTests */,
+			);
+			name = DeuresTests;
+			packageProductDependencies = (
+			);
+			productName = DeuresTests;
+			productReference = D0000000000000000000A003 /* DeuresTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		D0000000000000000000F001 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 2700;
+				LastUpgradeCheck = 2700;
+				TargetAttributes = {
+					D00000000000000000001001 = {
+						CreatedOnToolsVersion = 27.0;
+					};
+					D00000000000000000001002 = {
+						CreatedOnToolsVersion = 27.0;
+					};
+					D00000000000000000001003 = {
+						CreatedOnToolsVersion = 27.0;
+						TestTargetID = D00000000000000000001001;
+					};
+				};
+			};
+			buildConfigurationList = D00000000000000000005001 /* Build configuration list for PBXProject "Deures" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = D00000000000000000003001;
+			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				D0000000000000000000D001 /* XCRemoteSwiftPackageReference "hotwire-native-ios" */,
+				D0000000000000000000D002 /* XCLocalSwiftPackageReference "Packages/Gate" */,
+			);
+			preferredProjectObjectVersion = 77;
+			productRefGroup = D00000000000000000003002 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				D00000000000000000001001 /* Deures */,
+				D00000000000000000001002 /* DeuresMonitor */,
+				D00000000000000000001003 /* DeuresTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		D00000000000000000002003 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D00000000000000000002013 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D00000000000000000002023 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		D00000000000000000002001 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D00000000000000000002011 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D00000000000000000002021 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		D00000000000000000006001 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = D00000000000000000001002 /* DeuresMonitor */;
+			targetProxy = D0000000000000000000E001 /* PBXContainerItemProxy */;
+		};
+		D00000000000000000006002 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = D00000000000000000001001 /* Deures */;
+			targetProxy = D0000000000000000000E002 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		D00000000000000000005002 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = D0000000000000000000A011 /* Base.xcconfig */;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = 2;
+			};
+			name = Debug;
+		};
+		D00000000000000000005003 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = D0000000000000000000A011 /* Base.xcconfig */;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = 2;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		D00000000000000000005011 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = Config/Deures.entitlements;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Config/Deures-Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = Deures;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "$(BUNDLE_ID_PREFIX).deures";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		D00000000000000000005012 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = Config/Deures.entitlements;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Config/Deures-Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = Deures;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "$(BUNDLE_ID_PREFIX).deures";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+		D00000000000000000005021 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = Config/Monitor.entitlements;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Config/Monitor-Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = DeuresMonitor;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "$(BUNDLE_ID_PREFIX).deures.monitor";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+			};
+			name = Debug;
+		};
+		D00000000000000000005022 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = Config/Monitor.entitlements;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Config/Monitor-Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = DeuresMonitor;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "$(BUNDLE_ID_PREFIX).deures.monitor";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+			};
+			name = Release;
+		};
+		D00000000000000000005031 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "$(BUNDLE_ID_PREFIX).deures.tests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Deures.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Deures";
+			};
+			name = Debug;
+		};
+		D00000000000000000005032 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "$(BUNDLE_ID_PREFIX).deures.tests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Deures.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Deures";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		D00000000000000000005001 /* Build configuration list for PBXProject "Deures" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D00000000000000000005002 /* Debug */,
+				D00000000000000000005003 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		D00000000000000000005010 /* Build configuration list for PBXNativeTarget "Deures" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D00000000000000000005011 /* Debug */,
+				D00000000000000000005012 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		D00000000000000000005020 /* Build configuration list for PBXNativeTarget "DeuresMonitor" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D00000000000000000005021 /* Debug */,
+				D00000000000000000005022 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		D00000000000000000005030 /* Build configuration list for PBXNativeTarget "DeuresTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D00000000000000000005031 /* Debug */,
+				D00000000000000000005032 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		D0000000000000000000D002 /* XCLocalSwiftPackageReference "Packages/Gate" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/Gate;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		D0000000000000000000D001 /* XCRemoteSwiftPackageReference "hotwire-native-ios" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/hotwired/hotwire-native-ios";
+			requirement = {
+				kind = exactVersion;
+				version = 1.3.1;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		D0000000000000000000C001 /* HotwireNative */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = D0000000000000000000D001 /* XCRemoteSwiftPackageReference "hotwire-native-ios" */;
+			productName = HotwireNative;
+		};
+		D0000000000000000000C002 /* GateKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = D0000000000000000000D002 /* XCLocalSwiftPackageReference "Packages/Gate" */;
+			productName = GateKit;
+		};
+		D0000000000000000000C003 /* GateKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = D0000000000000000000D002 /* XCLocalSwiftPackageReference "Packages/Gate" */;
+			productName = GateKit;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = D0000000000000000000F001 /* Project object */;
+}

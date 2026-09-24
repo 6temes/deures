@@ -8,6 +8,7 @@ class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
     # rejection it swallows still happens, which is why "pressing a key plays the click" can
     # still fail when the tick breaks.
     driver_option.add_argument("--mute-audio")
+    driver_option.add_option("goog:loggingPrefs", {browser: "ALL"})
     driver_option.add_argument("--disable-dev-shm-usage") if ENV["CI"]
   end
 
@@ -52,6 +53,9 @@ class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
   # Waiting on the global alone let a click reach a page Turbo was not yet
   # intercepting, so a button_to submitted natively and its turbo_confirm dialog
   # never opened.
+  #
+  # Bridge controllers are left out: a BridgeComponent declines to load unless the
+  # user agent is the native app's, so in this browser they never connect at all.
   def wait_for_page_ready
     Timeout.timeout(15) do
       sleep 0.05 until page_ready?
@@ -67,7 +71,7 @@ class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
       window.Turbo?.session?.started === true &&
       typeof window.Stimulus !== 'undefined' &&
       [...document.querySelectorAll('[data-controller]')].every(el =>
-        el.dataset.controller.split(' ').every(id =>
+        el.dataset.controller.split(' ').filter(id => !id.startsWith('bridge--')).every(id =>
           window.Stimulus.getControllerForElementAndIdentifier(el, id)
         )
       )

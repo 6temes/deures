@@ -2,7 +2,7 @@
   <%= render "studies/verdict", attempt: @attempt if @attempt&.correct? %>
   <%= render "studies/correction", attempt: @attempt if @attempt&.wrong? %>
   <%= render "studies/card", item: @item if @item %>
-  <%= render "studies/done", celebrate: @celebrate, child: @child if @study_day.done_at? %>
+  <%= render "studies/done", celebrate: @celebrate, child: @child, date: @study_day.study_date if @study_day.done_at? %>
 <% end %>
 
 <%= turbo_stream.update "progress" do %>

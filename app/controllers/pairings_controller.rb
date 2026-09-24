@@ -15,6 +15,7 @@ class PairingsController < ApplicationController
     return lost_identity unless @pairing_link
 
     start_pairing_for @pairing_link
+    redirect_to root_path if hotwire_native_app?
   end
 
   # Built here rather than in a template: a manifest is a JSON body, and an ERB view would only
