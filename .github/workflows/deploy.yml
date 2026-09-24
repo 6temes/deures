@@ -32,6 +32,7 @@ jobs:
     env:
       AKAMAI_HOST_KEY: ${{ secrets.AKAMAI_HOST_KEY }}
       APP_HOST: ${{ secrets.APP_HOST }}
+      APPLE_APP_ID: ${{ secrets.APPLE_APP_ID }}
       DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
       DEPLOY_SHA: ${{ github.event.workflow_run.head_sha }}
       DEPLOY_SSH_PORT: ${{ secrets.DEPLOY_SSH_PORT }}

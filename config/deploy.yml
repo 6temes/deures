@@ -38,6 +38,7 @@ env:
     - RAILS_MASTER_KEY
   clear:
     APP_HOST: <%= ENV["APP_HOST"] %>
+    APPLE_APP_ID: <%= ENV["APPLE_APP_ID"] %>
     # The entrypoint restores the primary database from the replica on a fresh volume, so the
     # web container needs the same SFTP target as the litestream accessory; without host and
     # user the restore aborts with "host required for sftp replica". The key it reads is mounted

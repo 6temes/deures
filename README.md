@@ -38,6 +38,11 @@ per card, and the only thing to tap is a digit.
 Everything a parent does — writing a deck, watching where a child is stuck, pairing an iPad —
 happens in a Rails console, never in the app.
 
+On a school day there can also be a gate. The iPad app in `ios/` wraps the same study screen, and
+until the day's cards are done, Apple's Screen Time keeps every other app shut but the few a
+parent chose. Its one parent screen, to unlock the day or change those apps, opens only with a
+PIN. The [runbook](RUNBOOK.md#the-ipad-app) installs it.
+
 ## A session
 
 There are four screens, and a child moves between them by answering.
@@ -141,6 +146,7 @@ bin/dev                        # development server
 bin/ci                         # the gate. Run before merging
 bin/ci style                   # one group of it — style, security, tests, or system
 bin/rails runner 'Ops.help'    # every operation, with a working example of each
+ios/bin/test                   # the iPad app's packages, build and tests. Needs a Mac
 ```
 
 Every read and write of the app's data goes through an operation in `app/operations/ops/`, and
@@ -159,10 +165,15 @@ and the entrypoint that boots it; what any deployment has to provide is:
 | A database file in that volume before the server starts | The entrypoint refuses to boot without one rather than creating an empty one — see the [runbook](RUNBOOK.md#the-first-boot). |
 | Continuous replication of that file off the host | The volume is one disk, and every card, schedule and attempt is on it. |
 | `APP_HOST`, the domain the app is reached on | It is the `config.hosts` allowlist, so without it production rejects every request; and it is the host `Ops::Devices::IssueLink` prints pairing links for. Both fall back to `study.example.com`. |
+| `APPLE_APP_ID`, as `<TeamID>.<bundle id>` of the iPad app | It is served as `/.well-known/apple-app-site-association`, which is what makes a pairing code open the iPad app. Without it that path answers 404 and pairing links open Safari. |
 | TLS terminated in front of the app, with the `Host` header preserved | `force_ssl` and `assume_ssl` are both on, so the app trusts that it is behind HTTPS and does not need the forwarded-proto header — but the `Host` it receives has to match `APP_HOST`. |
 
-The first boot, the first seed, pairing an iPad and the restore drill are in
-[RUNBOOK.md](RUNBOOK.md).
+Anything in front of the app, such as a CDN or a firewall with a bot challenge, has to let Apple
+fetch `/.well-known/apple-app-site-association` with neither a challenge nor a redirect. A build
+from Xcode fetches it from the iPad; an App Store build fetches it through Apple's own CDN.
+
+The first boot, the first seed, pairing an iPad, installing the iPad app and the restore drill
+are in [RUNBOOK.md](RUNBOOK.md).
 
 ## Contributing
 
