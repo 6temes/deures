@@ -1,0 +1,4 @@
+// Copy to Local.xcconfig next to this file. That copy is git-ignored and overrides Base.xcconfig.
+DEVELOPMENT_TEAM = YOUR_TEAM_ID
+BUNDLE_ID_PREFIX = com.example.family
+APP_HOST = deures.example.com
