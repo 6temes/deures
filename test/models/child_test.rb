@@ -91,4 +91,41 @@ class ChildTest < ActiveSupport::TestCase
       children(:pau).update_column :light_day_threshold, 0
     end
   end
+
+  test "a school day with no study record is pending, and asking leaves it unopened" do
+    assert_no_difference -> { StudyDay.count } do
+      assert_equal :pending, children(:teo).day_state(MONDAY)
+    end
+  end
+
+  test "an opened day with cards still due is pending" do
+    assert_equal :pending, children(:pau).day_state(MONDAY)
+  end
+
+  test "a settled day is done" do
+    day = study_days(:pau_today)
+    day.queue_items.each { it.clear! :correct }
+    day.settle!
+
+    assert_equal :done, children(:pau).day_state(MONDAY)
+  end
+
+  test "an excused day is excused, with or without a record before it" do
+    travel_to Time.utc(2026, 9, 13, 23, 30)
+    capture_io { Ops::Relief::Excuse.call child: "Pau", reason: "ill" }
+    capture_io { Ops::Relief::Excuse.call child: "Teo", reason: "ill" }
+
+    assert_equal :excused, children(:pau).day_state(MONDAY)
+    assert_equal :excused, children(:teo).day_state(MONDAY)
+  end
+
+  test "a weekend or a public holiday is free, whatever the record holds" do
+    assert study_days(:teo_yesterday).done_at
+    assert_equal :free, children(:teo).day_state(Date.new(2026, 9, 13))
+    assert_equal :free, children(:pau).day_state(Date.new(2026, 9, 19))
+    assert_equal :free, children(:pau).day_state(Date.new(2026, 9, 23))
+  end
+
+  # A Monday that is no holiday in Japan, and the date the study-day fixtures call today.
+  MONDAY = Date.new(2026, 9, 14)
 end

@@ -83,6 +83,18 @@ class Child < ApplicationRecord
     COLORS_DARK.fetch color
   end
 
+  # Found rather than opened: opening assembles the queue and settles an empty day, and that
+  # belongs to the child opening Deures, not to a device asking whether to unlock.
+  def day_state(date)
+    return :free if Household.instance.free_day? date
+
+    day = study_days.find_by study_date: date
+    if day&.done_at then :done
+    elsif day&.excused_at then :excused
+    else :pending
+    end
+  end
+
   private
 
   def new_card_cap_within_light_day_threshold
