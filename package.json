@@ -10,7 +10,7 @@
     "@herb-tools/linter": "^0.10.4",
     "eslint": "^10.10.0",
     "globals": "^17.12.0",
-    "prettier": "^3.7.0",
+    "prettier": "^3.9.8",
     "stimulus-language-server": "^1.1.2"
   }
 }
