@@ -1,7 +1,8 @@
 module Authentication
   extend ActiveSupport::Concern
 
-  COOKIE = :device_token
+  # Named after a linked worktree in development, like the session cookie.
+  COOKIE = ["device_token", (Worktree.identity(Rails.root.to_s) if Rails.env.development?)].compact.join("_")
   LIFETIME = 2.years
 
   included do
