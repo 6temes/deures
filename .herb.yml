@@ -6,6 +6,11 @@
 # `herb lint` is the rules below, and it is a Node program. It is pinned by package.json and
 # yarn.lock, so the gem runs node_modules/.bin/herb-lint rather than resolving a version off
 # the network — which is what it does when no local copy exists.
+
+# Herb assumes plain Ruby ERB when this is absent, and then skips every Action View rule and
+# stops parsing helpers like `link_to` and `render` as Action View.
+framework: actionview
+
 linter:
   enabled: true
 
