@@ -6,7 +6,7 @@
 #
 default: &default
   adapter: sqlite3
-  max_connections: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
+  max_connections: 100
   # A Litestream checkpoint catch-up on the production primary can hold the write lock past
   # the 5s default, turning a healthy request into a 500. 10s lets such requests ride it out.
   timeout: 10000
