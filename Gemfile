@@ -25,7 +25,7 @@ gem "solid_queue"
 
 # json 3.0 made JSON.parse keyword-only, and Active Support 8.1.3.1 still passes its
 # options positionally, which breaks every json column and every JSON request body.
-gem "json", "~> 2.21"
+gem "json", "~> 3.0"
 
 # The pairing link is shown as a QR code in the console that issued it
 # [https://github.com/whomwah/rqrcode_core]
