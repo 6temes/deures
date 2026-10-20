@@ -116,4 +116,3 @@ group :test do
 
   gem "selenium-webdriver"
 end
-plugin "bundler-hyperdrive"
