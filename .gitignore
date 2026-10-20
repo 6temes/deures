@@ -71,3 +71,4 @@
 # link printed there signs an iPad in as a child with no further check.
 .byebug_history
 .irb_history
+.hyperdrive/discover_cache.json

@@ -188,6 +188,7 @@ GEM
       thor (~> 1.3)
       zeitwerk (>= 2.6.18, < 3.0)
     language_server-protocol (3.17.0.6)
+    layered-rails-skills (3.1.0)
     lint_roller (1.1.0)
     logger (1.7.0)
     loofah (2.25.2)
@@ -338,6 +339,11 @@ GEM
     rails-html-sanitizer (1.7.1)
       loofah (~> 2.25, >= 2.25.2)
       nokogiri (>= 1.15.7, != 1.16.7, != 1.16.6, != 1.16.5, != 1.16.4, != 1.16.3, != 1.16.2, != 1.16.1, != 1.16.0.rc1, != 1.16.0)
+    rails-hyperdrive (0.10.1)
+      activerecord (>= 7.2)
+      bundler (>= 2.3)
+      mcp (>= 0.25)
+      railties (>= 7.2)
     rails-informant (0.5.3)
       actionpack (>= 8.1)
       activejob (>= 8.1)
@@ -516,6 +522,7 @@ DEPENDENCIES
   importmap-rails
   json (~> 3.0)
   kamal
+  layered-rails-skills
   minitest-mock
   opentelemetry-exporter-otlp
   opentelemetry-instrumentation-action_pack
@@ -529,6 +536,7 @@ DEPENDENCIES
   propshaft
   puma (>= 5.0)
   rails (~> 8.1.4)
+  rails-hyperdrive
   rails-informant
   rails_semantic_logger
   rqrcode_core
@@ -618,6 +626,7 @@ CHECKSUMS
   json_schemer (2.5.0) sha256=2f01fb4cce721a4e08dd068fc2030cffd0702a7f333f1ea2be6e8991f00ae396
   kamal (2.12.0) sha256=c51d1ab085e515470f98d0c0f043637122b5ebf76e8b610cb1fbbed0b7f9b8fa
   language_server-protocol (3.17.0.6) sha256=5ef2c0c138f8267e1bc631d3328347d354f96724b0af22f2c79516120443b7f0
+  layered-rails-skills (3.1.0) sha256=5bf2cdae8e0262e418e65016c35e391b58fbb1f5c41eae516d1d1cd14ed56736
   lint_roller (1.1.0) sha256=2c0c845b632a7d172cb849cc90c1bce937a28c5c8ccccb50dfd46a485003cc87
   logger (1.7.0) sha256=196edec7cc44b66cfb40f9755ce11b392f21f7967696af15d274dde7edff0203
   loofah (2.25.2) sha256=2007f746959ac65552456e04b433e83deb22759ab38c838b4445c70e43425918
@@ -680,6 +689,7 @@ CHECKSUMS
   rails (8.1.4) sha256=5f3ecdf9a2a3b79b2e31b8fee3b64a00f7284d76e5631f87d0e58e665911a33b
   rails-dom-testing (2.3.0) sha256=8acc7953a7b911ca44588bf08737bc16719f431a1cc3091a292bca7317925c1d
   rails-html-sanitizer (1.7.1) sha256=e797a7c9b01e567307e317c576b49ab4168017e63eea4dba9ce3cb587e2f22c2
+  rails-hyperdrive (0.10.1) sha256=5e801e043915dc57f5724d4a5677c24030e614d1f1c1866c55e5176687d17fd5
   rails-informant (0.5.3) sha256=107bf3cad6a79ba3346055c0161973452c0e96af5b4550186f018d7e86b5c69c
   rails_semantic_logger (5.2.0) sha256=c02dcc300bbfc520beb48e997305652d3b6f1d87fb1ca5325af75f55d4568350
   railties (8.1.4) sha256=b5e7a8e8984e33114d68af62227971960aae1e6c02bd7c9d826ffad97fff583c

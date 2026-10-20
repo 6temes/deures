@@ -10,3 +10,5 @@ ignore_unreachable_actions:
   - ^active_storage
 ignore_unused_routes:
   - ^active_storage
+  # Hyperdrive's MCP transport, drawn only in development and served by the engine's own Rack app.
+  - ^/mcp$
