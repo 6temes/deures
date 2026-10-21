@@ -344,7 +344,7 @@ GEM
       bundler (>= 2.3)
       mcp (>= 0.25)
       railties (>= 7.2)
-    rails-informant (0.5.3)
+    rails-informant (0.6.0)
       actionpack (>= 8.1)
       activejob (>= 8.1)
       activerecord (>= 8.1)
@@ -690,7 +690,7 @@ CHECKSUMS
   rails-dom-testing (2.3.0) sha256=8acc7953a7b911ca44588bf08737bc16719f431a1cc3091a292bca7317925c1d
   rails-html-sanitizer (1.7.1) sha256=e797a7c9b01e567307e317c576b49ab4168017e63eea4dba9ce3cb587e2f22c2
   rails-hyperdrive (0.10.1) sha256=5e801e043915dc57f5724d4a5677c24030e614d1f1c1866c55e5176687d17fd5
-  rails-informant (0.5.3) sha256=107bf3cad6a79ba3346055c0161973452c0e96af5b4550186f018d7e86b5c69c
+  rails-informant (0.6.0) sha256=22edf8d152174f110aba86d89c18366a3158da1f1eed5a46a94e6427fb354439
   rails_semantic_logger (5.2.0) sha256=c02dcc300bbfc520beb48e997305652d3b6f1d87fb1ca5325af75f55d4568350
   railties (8.1.4) sha256=b5e7a8e8984e33114d68af62227971960aae1e6c02bd7c9d826ffad97fff583c
   rainbow (3.1.1) sha256=039491aa3a89f42efa1d6dec2fc4e62ede96eb6acd95e52f1ad581182b79bc6a
