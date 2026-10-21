@@ -1,3 +1,4 @@
+/.hyperdrive
 # Prettier owns the JavaScript and the stylesheet. The fixtures carry ERB inside YAML
 # strings, the README is wrapped by hand, and db/schema.rb is generated — reflowing any of
 # them is churn at best. The stylesheet is left out too: its one-line rules are deliberate

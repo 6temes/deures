@@ -100,6 +100,10 @@ group :development do
 
   # Use console on exceptions pages [https://github.com/rails/web-console]
   gem "web-console"
+
+  # Live MCP server for coding agents, plus agent skills shipped by bundled gems
+  gem "layered-rails-skills"
+  gem "rails-hyperdrive"
 end
 
 group :test do
