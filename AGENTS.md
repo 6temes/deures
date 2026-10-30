@@ -155,3 +155,6 @@ avoiding the first four habits rather than a need.
   states.
 - Alphabetical ordering for associations, validations, enum values, and hash keys, where
   it reads better.
+- Learnings from solved problems live in `docs/solutions/`, which git ignores, so it exists
+  only in a checkout that has written some. Search it before changing a job, a query loop,
+  or the Puma config.
