@@ -13,16 +13,13 @@ concurrency:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    # `workflow_run` runs in this repository's context with this repository's secrets, and the
-    # `branches:` filter above matches the *triggering* run's head branch — a name whoever opened
-    # the pull request chose. CI runs on `pull_request`, so without the two checks below a fork
-    # branch called `main` with passing CI would deploy its own commit with the deploy key in
-    # scope. The guard is on the job, not a step: a step-level `if` still lets earlier steps run
-    # with the secrets already loaded.
+    # workflow_run runs with secrets, so deploy only CI runs for pushes to this repo's main.
     if: >-
-      ${{ github.event.workflow_run.conclusion == 'success'
-      && github.event.workflow_run.event == 'push'
-      && github.event.workflow_run.head_repository.full_name == github.repository }}
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'push' &&
+      github.event.workflow_run.head_branch == 'main' &&
+      github.event.workflow_run.head_repository.full_name == github.repository
+    environment: production
     timeout-minutes: 10
 
     permissions:
