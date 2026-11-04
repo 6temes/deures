@@ -214,7 +214,7 @@ class PairingsControllerTest < ActionDispatch::IntegrationTest
     get pairing_path(token: @token)
 
     assert_equal unknown_status, response.status
-    assert_equal without_nonce(unknown_body), without_nonce(response.body)
+    assert_equal without_per_request_tokens(unknown_body), without_per_request_tokens(response.body)
   end
 
   test "the lost-identity screen, which is the shared layout without the install view, links no manifest and no per-child icon" do
@@ -256,10 +256,11 @@ class PairingsControllerTest < ActionDispatch::IntegrationTest
 
   private
 
-  # The CSP nonce is fresh per request by design, so it is the one part of these two bodies
-  # that must differ. Everything else still has to match byte for byte.
-  def without_nonce(body)
+  # The CSP nonce and Informant's encrypted browser context are fresh per request by design,
+  # so they are the parts of these two bodies that must differ. Everything else still has to
+  # match byte for byte.
+  def without_per_request_tokens(body)
     body.gsub(/nonce="[^"]*"/, 'nonce=""')
-      .gsub(/(<meta name="csp-nonce" content=)"[^"]*"/, '\\1""')
+      .gsub(/(<meta name="(?:csp-nonce|informant-browser)" content=)"[^"]*"/, '\\1""')
   end
 end
