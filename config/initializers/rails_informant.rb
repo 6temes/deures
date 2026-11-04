@@ -9,4 +9,5 @@ RailsInformant.configure do |config|
 
   # Required whenever capture is on: the engine refuses to boot a server without it.
   config.api_token = Rails.application.credentials.dig(:rails_informant, :api_token)
+  config.capture_browser_errors = true
 end
