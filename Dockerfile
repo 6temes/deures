@@ -24,7 +24,7 @@ RUN apt-get update -qq && \
 # The entrypoint restores the database from its replica before the server starts. The binary is
 # taken from the same digest the replication accessory runs, so restore and replicate can never
 # be two different versions of Litestream.
-COPY --from=litestream/litestream@sha256:5572700ba18710cb010a0e415e36abf5cc0b4d74a2ad7b6d6a387142c0c99604 /usr/local/bin/litestream /usr/local/bin/litestream
+COPY --from=litestream/litestream@sha256:0ba1cdbb2d0be8876e27b1e646dc031309b7e3928e0ed91503ebaa73ff7e2c5d /usr/local/bin/litestream /usr/local/bin/litestream
 
 # Set production environment variables and enable jemalloc for reduced memory usage and latency.
 ENV RAILS_ENV="production" \

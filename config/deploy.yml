@@ -65,7 +65,7 @@ accessories:
     # Pinned by digest and run as a numeric root: the image is FROM scratch with no passwd, so
     # "root" by name will not resolve, and the image's own nonroot default cannot read either the
     # 0600 SFTP key or root's known_hosts, which breaks replication without saying so.
-    image: litestream/litestream@sha256:5572700ba18710cb010a0e415e36abf5cc0b4d74a2ad7b6d6a387142c0c99604
+    image: litestream/litestream@sha256:0ba1cdbb2d0be8876e27b1e646dc031309b7e3928e0ed91503ebaa73ff7e2c5d # 0.5.18-scratch
     options:
       user: "0:0"
     host: <%= ENV["DEPLOY_HOST"] %>
