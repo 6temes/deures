@@ -29,8 +29,10 @@ proxy:
     path: /up
 
 # Kamal's own transient registry, forwarded over SSH from the machine that builds the image.
+# 5556, not Kamal's usual 5555: invoices forwards 5555 to the same host, and two deploys
+# pushing at once cannot both bind it.
 registry:
-  server: localhost:5555
+  server: localhost:5556
 
 # Inject ENV variables into containers (secrets come from .kamal/secrets).
 env:
@@ -54,7 +56,7 @@ env:
 
 accessories:
   prometheus-exporter:
-    image: localhost:5555/dlopez/deures:latest
+    image: localhost:5556/dlopez/deures:latest
     host: <%= ENV["DEPLOY_HOST"] %>
     # The container side stays 9394 to match the prometheus_exporter client initializer and the
     # command below; the host side is this application's own, the neighbours holding 9394-9396.
