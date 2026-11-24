@@ -38,6 +38,13 @@
 !/app/assets/builds/.keep
 /public/assets
 
+# Yarn's per-install state. The release under .yarn/releases is tracked, so every machine runs
+# the version package.json names; this project does not use zero-installs, so the cache is not.
+/.yarn/build-state.yml
+/.yarn/cache
+/.yarn/install-state.gz
+/.yarn/unplugged
+
 # Ignore development files
 /.devcontainer
 

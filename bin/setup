@@ -23,7 +23,7 @@ FileUtils.chdir APP_ROOT do
   # Hooks live in .git, which no commit reaches, so a clone has no gate until this runs. This
   # repository is public: the gate is what stands between a stray key and everyone.
   puts "\n== Installing JavaScript dev tooling =="
-  system! "yarn install --frozen-lockfile"
+  system! "yarn install --immutable"
 
   puts "\n== Installing the pre-commit gate =="
   system! "git config core.hooksPath .githooks"
