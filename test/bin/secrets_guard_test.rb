@@ -58,6 +58,16 @@ class SecretsGuardTest < ActiveSupport::TestCase
     assert_nil stage("tmp/pids/.keep" => "", "log/.keep" => "")
   end
 
+  test "passes the vendored Yarn release, whose embedded WebAssembly looks like an AWS key" do
+    body = "wasm:\"AGFzbQ" + "AKIA" + "IOSFODNN7EXAMPLE\"\n"
+    assert_nil stage(".yarn/releases/yarn-4.18.1.cjs" => body)
+  end
+
+  test "still refuses a key beside the Yarn release under any other name" do
+    body = "AKIA" + "IOSFODNN7EXAMPLE\n"
+    assert_includes stage(".yarn/releases/notes.cjs" => body), "an AWS access key id"
+  end
+
   private
 
   # Stages the given files in a fresh repository and runs the gate over them. Returns what it
