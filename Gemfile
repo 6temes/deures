@@ -76,6 +76,9 @@ group :development, :test do
   # Static analysis for security vulnerabilities [https://brakemanscanner.org/]
   gem "brakeman", require: false
 
+  # Known advisories against the locked gems [https://github.com/rubysec/bundler-audit]
+  gem "bundler-audit", require: false
+
   # Finds a model validation with no database constraint behind it, which is the house rule
   # this app is built on [https://github.com/djezzzl/database_consistency]
   gem "database_consistency", require: false
