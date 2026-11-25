@@ -34,6 +34,9 @@ module Deures
     # the request line above it already records the path, scrubbed, and its status.
     config.action_dispatch.log_rescued_responses = false
 
+    # No model has an attachment. Remove this line in the change that adds the first one.
+    config.active_storage.draw_routes = false
+
     # Configuration for the application, engines, and railties goes here.
     #
     # These settings can be overridden in specific environments using the files
