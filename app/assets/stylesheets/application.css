@@ -411,6 +411,13 @@ body {
   gap: calc(var(--pad-gap) * 3);
 }
 
+.install-button {
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
 .install-icon {
   width: min(45vmin, 180px);
   height: min(45vmin, 180px);

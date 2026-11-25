@@ -515,6 +515,8 @@ class StudyTest < ApplicationSystemTestCase
 
   def open_study_screen(child)
     visit pairing_path(token: child.pairing_links.create!.generate_token_for(:invitation))
+    click_button
+    assert_selector "[data-screen=install]"
     visit "/"
   end
 

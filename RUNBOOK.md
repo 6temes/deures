@@ -69,12 +69,12 @@ Issue the link from the console, which prints it as a code the iPad camera reads
 Ops::Devices::IssueLink.call child: "Pau"
 ```
 
-Point the camera at the code, open it in Safari, then Share and Add to Home Screen. The icon
-comes up in the child's color. Force-quit the app and reopen it from the icon to confirm it
-comes back as that child with nothing to tap. The link expires fifteen minutes after it is
-issued and pairs the one iPad that opens it, so issue it with that iPad in hand and issue a
-second one for a second iPad. After that the iPad is signed in by its own cookie, and the
-installed icon opens the app itself rather than the link.
+Point the camera at the code, open it in Safari, tap the child's icon to pair, then Share and
+Add to Home Screen. The icon comes up in the child's color. Force-quit the app and reopen it
+from the icon to confirm it comes back as that child with nothing to tap. The link expires
+fifteen minutes after it is issued and pairs the one iPad that taps it, so issue it with that
+iPad in hand and issue a second one for a second iPad. After that the iPad is signed in by its
+own cookie, and the installed icon opens the app itself rather than the link.
 
 One operation signs an iPad out:
 

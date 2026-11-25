@@ -9,23 +9,44 @@ class PairingsControllerTest < ActionDispatch::IntegrationTest
     @token = @link.generate_token_for(:invitation)
   end
 
-  test "opening a fresh pairing link pairs the iPad and renders the install view (AE15)" do
-    assert_difference -> { Device.count }, 1 do
+  test "opening a fresh pairing link shows whose it is and pairs nothing until it is tapped" do
+    assert_no_difference -> { Device.count } do
       get pairing_path(token: @token)
+      head pairing_path(token: @token)
     end
 
     assert_response :success
+    assert_nil @link.reload.claimed_at
+    assert_empty cookies[Authentication::COOKIE].to_s
+
+    get pairing_path(token: @token)
+
+    assert_select "[data-screen=confirm]"
+    assert_select "form[action=?][method=post] input[name=token][value=?]", pairing_path, @token
+  end
+
+  test "tapping the link pairs the iPad and lands on the install view (AE15)" do
+    assert_difference -> { Device.count }, 1 do
+      post pairing_path, params: {token: @token}
+    end
+
+    assert_redirected_to pairing_path
+    assert_equal 303, response.status
     assert_equal @child, Device.find_by_token(cookies[Authentication::COOKIE]).child
+
+    follow_redirect!
+
+    assert_response :success
     assert_select "[data-screen=install]"
   end
 
   test "the same token presented by another iPad pairs nothing and renders the lost-identity screen" do
-    get pairing_path(token: @token)
+    pair_with @token
 
     other_ipad = open_session
 
     assert_no_difference -> { Device.count } do
-      other_ipad.get pairing_path(token: @token)
+      other_ipad.post pairing_path, params: {token: @token}
     end
 
     assert_equal 404, other_ipad.response.status
@@ -37,7 +58,7 @@ class PairingsControllerTest < ActionDispatch::IntegrationTest
     travel 16.minutes
 
     assert_no_difference -> { Device.count } do
-      get pairing_path(token: @token)
+      pair_with @token
     end
 
     assert_response :not_found
@@ -48,6 +69,11 @@ class PairingsControllerTest < ActionDispatch::IntegrationTest
   test "a forged or truncated token renders the lost-identity screen rather than raising" do
     assert_no_difference -> { Device.count } do
       get pairing_path(token: FORGED_TOKEN)
+
+      assert_response :not_found
+      assert_select "[data-screen=lost-identity]"
+
+      post pairing_path, params: {token: FORGED_TOKEN}
 
       assert_response :not_found
       assert_select "[data-screen=lost-identity]"
@@ -65,7 +91,7 @@ class PairingsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "the paired iPad still fetches the manifest and both icons the install view asks for" do
-    get pairing_path(token: @token)
+    pair_with @token
 
     assert_response :success
 
@@ -83,7 +109,7 @@ class PairingsControllerTest < ActionDispatch::IntegrationTest
 
   test "the iPad keeps studying after the link that paired it is spent and another is issued" do
     travel_to Time.utc(2026, 9, 13, 23, 30)
-    get pairing_path(token: @token)
+    pair_with @token
     get "/"
 
     assert_select "[data-screen=study]"
@@ -98,7 +124,7 @@ class PairingsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "the manifest's start URL is the root, carrying no token, and stays inside the root scope" do
-    get pairing_path(token: @token)
+    pair_with @token
     get pairing_manifest_path
 
     assert_response :success
@@ -119,7 +145,7 @@ class PairingsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "the install view links the manifest with credentials, so the cookie reaches it" do
-    get pairing_path(token: @token)
+    pair_with @token
 
     assert_select "link[rel=manifest][href=?][crossorigin=use-credentials]", "/p/manifest.webmanifest"
     assert_select "link[rel=apple-touch-icon][href*=?]", "#{@child.color}-180"
@@ -134,13 +160,13 @@ class PairingsControllerTest < ActionDispatch::IntegrationTest
 
   test "an iPad whose device the agent forgot pairs again from a freshly issued link, not from the spent one (AE17)" do
     travel_to Time.utc(2026, 9, 13, 23, 30)
-    get pairing_path(token: @token)
+    pair_with @token
     forgotten_cookie = cookies[Authentication::COOKIE]
 
     capture_io { Ops::Devices::Forget.call child: @child.name, confirm: true }
 
     assert_no_difference -> { Device.count } do
-      get pairing_path(token: @token)
+      pair_with @token
     end
 
     assert_response :not_found
@@ -148,7 +174,7 @@ class PairingsControllerTest < ActionDispatch::IntegrationTest
     issued = @child.pairing_links.create!
 
     assert_difference -> { Device.count }, 1 do
-      get pairing_path(token: issued.generate_token_for(:invitation))
+      pair_with issued.generate_token_for(:invitation)
     end
 
     assert_not_equal forgotten_cookie, cookies[Authentication::COOKIE]
@@ -163,7 +189,7 @@ class PairingsControllerTest < ActionDispatch::IntegrationTest
 
   test "a forgotten device's cookie alone gets the grown-up screen (AE17)" do
     travel_to Time.utc(2026, 9, 13, 23, 30)
-    get pairing_path(token: @token)
+    pair_with @token
 
     capture_io { Ops::Devices::Forget.call child: @child.name, confirm: true }
 
@@ -177,17 +203,17 @@ class PairingsControllerTest < ActionDispatch::IntegrationTest
   test "a device paired to another link is not reused, so a re-paired iPad gets its own device" do
     other = children(:teo).pairing_links.create!
 
-    get pairing_path(token: other.generate_token_for(:invitation))
+    pair_with other.generate_token_for(:invitation)
 
     assert_difference -> { Device.count }, 1 do
-      get pairing_path(token: @token)
+      pair_with @token
     end
 
     assert_equal @child, Device.find_by_token(cookies[Authentication::COOKIE]).child
   end
 
   test "the install view and the manifest both respond with no-store, and the manifest with the manifest content type" do
-    get pairing_path(token: @token)
+    pair_with @token
 
     assert_equal "no-store", response.headers["Cache-Control"]
 
@@ -198,7 +224,7 @@ class PairingsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "the install screen carries both of the child's colors too" do
-    get pairing_path(token: @token)
+    pair_with @token
 
     style = response.parsed_body.at_css("#screen")["style"]
     assert_includes style, "--child-light: #{@child.color_hex}"
@@ -210,7 +236,7 @@ class PairingsControllerTest < ActionDispatch::IntegrationTest
 
     unknown_status, unknown_body = response.status, response.body
 
-    open_session.get pairing_path(token: @token)
+    open_session.post pairing_path, params: {token: @token}
     get pairing_path(token: @token)
 
     assert_equal unknown_status, response.status
@@ -226,7 +252,7 @@ class PairingsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "the install view carries the legacy Apple standalone meta tags and offers no link to the root" do
-    get pairing_path(token: @token)
+    pair_with @token
 
     assert_select "meta[name='apple-mobile-web-app-capable'][content='yes']"
     assert_select "meta[name='apple-mobile-web-app-status-bar-style']"
@@ -235,7 +261,7 @@ class PairingsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "the install view replaces itself with the root when it is opened in standalone display mode" do
-    get pairing_path(token: @token)
+    pair_with @token
 
     assert_match "display-mode: standalone", response.body
     assert_match "location.replace", response.body
@@ -248,7 +274,7 @@ class PairingsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "the viewport clamps scaling and reaches into the safe area" do
-    get pairing_path(token: @token)
+    pair_with @token
 
     assert_select "meta[name=viewport][content=?]",
       "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"
