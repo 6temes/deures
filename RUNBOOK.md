@@ -76,6 +76,9 @@ fifteen minutes after it is issued and pairs the one iPad that taps it, so issue
 iPad in hand and issue a second one for a second iPad. After that the iPad is signed in by its
 own cookie, and the installed icon opens the app itself rather than the link.
 
+An iPad that goes ninety days without opening the app is signed out on its own and shows the
+lost-identity screen; a fresh link pairs it again.
+
 One operation signs an iPad out:
 
 ```ruby
