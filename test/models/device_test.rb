@@ -97,4 +97,23 @@ class DeviceTest < ActiveSupport::TestCase
       assert_equal Time.utc(2026, 9, 14, 5), device.reload.last_seen_at
     end
   end
+
+  test "a device unseen for longer than the dormancy limit is not found by its token" do
+    device = children(:pau).devices.create!
+    device.touch_last_seen
+
+    travel Device::DORMANT_AFTER - 1.day
+    assert_equal device, Device.find_by_token(device.plain_token)
+
+    travel 2.days
+    assert_nil Device.find_by_token(device.plain_token)
+  end
+
+  test "a device never seen after pairing goes dormant counting from when it was paired" do
+    device = children(:pau).devices.create!
+
+    travel Device::DORMANT_AFTER + 1.day
+
+    assert_nil Device.find_by_token(device.plain_token)
+  end
 end

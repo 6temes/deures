@@ -30,8 +30,12 @@ class Device < ApplicationRecord
   # to see to treat the iPad as already paired and never re-pair it.
   def self.find_by_token(token)
     device = super
-    device unless device&.forgotten?
+    device unless device.nil? || device.forgotten? || device.dormant?
   end
+
+  # An iPad that stays away this long is taken to be retired, so its cookie, wherever it has been
+  # copied to, stops signing anyone in. Long enough to outlast a school holiday.
+  DORMANT_AFTER = 90.days
 
   # Stamped rather than destroyed: the last-seen stamp is the only record of which iPad this was.
   def forget!
@@ -40,6 +44,10 @@ class Device < ApplicationRecord
 
   def forgotten?
     forgotten_at.present?
+  end
+
+  def dormant?
+    (last_seen_at || created_at).before? DORMANT_AFTER.ago
   end
 
   def touch_last_seen

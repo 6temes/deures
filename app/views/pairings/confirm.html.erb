@@ -1,0 +1,13 @@
+<%# Turbo is off so the install view arrives as a whole page, head and all, for Add to Home Screen to read. %>
+<div
+  id="screen"
+  class="screen install"
+  style="--child-light: <%= @child.color_hex %>; --child-dark: <%= @child.color_hex_dark %>"
+  data-screen="confirm"
+>
+  <%= button_to pairing_path, params: {token: params[:token]}, class: "install-button", form: {data: {turbo: false}} do %>
+    <%= image_tag "icons/#{@child.color}-180.png", class: "install-icon", width: 180, height: 180, alt: @child.name %>
+  <% end %>
+
+  <p class="install-name"><%= @child.name %></p>
+</div>
