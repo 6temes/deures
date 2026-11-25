@@ -24,6 +24,7 @@ GROUPS = {
   "security" => [
     ["Security: Secrets", "bin/secrets_guard --tracked"],
     ["Image: Ruby version", "bin/dockerfile_guard"],
+    ["Security: Gem audit", "bin/bundler-audit check --update"],
     ["Security: Importmap vulnerability audit", "bin/importmap audit"],
     ["Security: Brakeman code analysis", "bin/brakeman --quiet --no-pager --exit-on-warn --exit-on-error"]
   ],
