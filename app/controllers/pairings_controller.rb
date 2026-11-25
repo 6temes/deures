@@ -3,18 +3,32 @@ class PairingsController < ApplicationController
 
   # A signed token is not worth guessing at, so this is about the cost of being asked rather than
   # about the odds: the endpoint is public, unauthenticated and writes a row when it succeeds.
-  # Pairing happens a handful of times in an iPad's life, so a limit this high is one no parent
-  # reaches. Counting is by address, which behind the tunnel may well be one address for everyone
+  # Pairing happens a handful of times in an iPad's life, and one pairing is three requests here
+  # (the link, the tap, the install view), so a limit this high is one no parent reaches. Counting
+  # is by address, which behind the tunnel may well be one address for everyone
   # — the ceiling is set so that this stays true either way.
-  rate_limit to: 10, within: 1.minute, only: :show
+  rate_limit to: 10, within: 1.minute, only: %i[show create]
 
   before_action :no_store
-  before_action :set_pairing_link, only: :show
+  before_action :set_pairing_link, only: %i[show create]
 
+  # A live link asks for the tap that pairs. Once paired, the same path is the install view, which
+  # is also where Add to Home Screen lands if it installs this page rather than the manifest's root.
   def show
+    if @pairing_link
+      render :confirm
+    elsif !paired?
+      lost_identity
+    end
+  end
+
+  # A second tap arrives after the first has spent the link; the iPad it paired gets its install view.
+  def create
+    return redirect_to(pairing_path, status: :see_other) if !@pairing_link && paired?
     return lost_identity unless @pairing_link
 
     start_pairing_for @pairing_link
+    redirect_to pairing_path, status: :see_other
   end
 
   # Built here rather than in a template: a manifest is a JSON body, and an ERB view would only
@@ -46,6 +60,6 @@ class PairingsController < ApplicationController
 
   def set_pairing_link
     @pairing_link = PairingLink.find_by_token_for :invitation, params[:token]
-    @child = @pairing_link&.child
+    @child = @pairing_link&.child || Current.child
   end
 end

@@ -25,7 +25,10 @@ Rails.application.routes.draw do
   # Can be used by load balancers and uptime monitors to verify that the app is live.
   get "up" => "rails/health#show", :as => :rails_health_check
 
+  # Opening the link only shows whose it is; the tap that follows is what spends it, so nothing
+  # that fetches the URL before the iPad does (a link preview, a prefetch) pairs anything.
   get "p" => "pairings#show", :as => :pairing
+  post "p" => "pairings#create"
 
   # The path is a literal filename, not a token, but Rails still appends an optional (.:format)
   # after it unless format is turned off — so "manifest.webmanifest.json" would otherwise also
