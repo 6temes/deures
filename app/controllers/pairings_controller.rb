@@ -3,8 +3,9 @@ class PairingsController < ApplicationController
 
   # A signed token is not worth guessing at, so this is about the cost of being asked rather than
   # about the odds: the endpoint is public, unauthenticated and writes a row when it succeeds.
-  # Pairing happens a handful of times in an iPad's life, so a limit this high is one no parent
-  # reaches. Counting is by address, which behind the tunnel may well be one address for everyone
+  # Pairing happens a handful of times in an iPad's life, and one pairing is three requests here
+  # (the link, the tap, the install view), so a limit this high is one no parent reaches. Counting
+  # is by address, which behind the tunnel may well be one address for everyone
   # — the ceiling is set so that this stays true either way.
   rate_limit to: 10, within: 1.minute, only: %i[show create]
 
@@ -21,7 +22,9 @@ class PairingsController < ApplicationController
     end
   end
 
+  # A second tap arrives after the first has spent the link; the iPad it paired gets its install view.
   def create
+    return redirect_to(pairing_path, status: :see_other) if !@pairing_link && paired?
     return lost_identity unless @pairing_link
 
     start_pairing_for @pairing_link

@@ -40,6 +40,36 @@ class PairingsControllerTest < ActionDispatch::IntegrationTest
     assert_select "[data-screen=install]"
   end
 
+  test "a second tap from the iPad the first one paired lands on its install view" do
+    pair_with @token
+
+    assert_no_difference -> { Device.count } do
+      post pairing_path, params: {token: @token}
+    end
+
+    assert_redirected_to pairing_path
+  end
+
+  test "a tap carrying no authenticity token pairs nothing" do
+    get pairing_path(token: @token)
+    ActionController::Base.allow_forgery_protection = true
+
+    assert_no_difference -> { Device.count } do
+      post pairing_path, params: {token: @token}
+    end
+  ensure
+    ActionController::Base.allow_forgery_protection = false
+  end
+
+  test "an iPad unseen for longer than the dormancy limit gets the grown-up screen" do
+    pair_with @token
+
+    travel Device::DORMANT_AFTER + 1.day
+    get "/"
+
+    assert_select "[data-screen=lost-identity]"
+  end
+
   test "the same token presented by another iPad pairs nothing and renders the lost-identity screen" do
     pair_with @token
 
